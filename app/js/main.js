@@ -47,7 +47,7 @@ const STORE = 'rte.v3';
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-let state = { me: null, roomTitle: null, days: [], usingSample: false };
+let state = { me: null, roomTitle: null, days: [], usingSample: false, job: null, seen: false };
 let parsed = null;
 let activeDay = null;
 let deck = null;
@@ -67,7 +67,7 @@ const save = () => { try { localStorage.setItem(STORE, JSON.stringify(state)); }
 function load() {
   try {
     const v = JSON.parse(localStorage.getItem(STORE) || 'null');
-    return v && Array.isArray(v.days) && v.days.length ? v : null;
+    return v && Array.isArray(v.days) ? v : null;
   } catch { return null; }
 }
 
@@ -89,8 +89,8 @@ $('file').addEventListener('change', async (e) => {
 $('go-parse').addEventListener('click', () => ingest(paste.value, false));
 $('go-sample').addEventListener('click', () => ingest(SAMPLE_TXT, true));
 $('go-resume').addEventListener('click', () => { renderDays(); show('days'); });
-$('back-import').addEventListener('click', () => show('import'));
-$('back-days').addEventListener('click', () => show(parsed ? 'preview' : 'import'));
+$('back-preview').addEventListener('click', () => show('import'));
+$('back-days').addEventListener('click', () => show(parsed ? 'preview' : 'home'));
 
 function ingest(raw, isSample) {
   const p = parseKakaoExport(raw);
@@ -169,11 +169,14 @@ $('go-days').addEventListener('click', () => {
 /* ══════ job decks ══════ */
 /* A job deck is just a deck that arrived pre-translated, so it joins state.days
    and reuses the whole practice, scheduling and progress machinery. */
-$('go-jobs').addEventListener('click', () => { renderJobs(); show('jobs'); });
-$('back-jobs').addEventListener('click', () => show('import'));
+$('go-import').addEventListener('click', () => show('import'));
+$('back-home').addEventListener('click', () => { refreshResume(); renderJobs(); show('home'); });
 
 function renderJobs() {
-  $('job-list').innerHTML = JOB_DECKS.map((d) => {
+  const ordered = state.job
+    ? [...JOB_DECKS].sort((a, b) => (b.id === state.job) - (a.id === state.job))
+    : JOB_DECKS;
+  $('job-list').innerHTML = ordered.map((d) => {
     const mine = state.days.find((x) => x.jobId === d.id);
     const st = !mine ? 'new' : dayStatus(mine);
     const label = st === 'done' ? '완료' : st === 'ready' ? '이어서' : d.blurb;
@@ -191,6 +194,8 @@ function renderJobs() {
 function openJobDeck(jobId) {
   const src = JOB_DECKS.find((d) => d.id === jobId);
   if (!src) return;
+  state.job = jobId;
+  state.seen = true;
   let i = state.days.findIndex((d) => d.jobId === jobId);
   if (i < 0) {
     state.days.unshift({
@@ -212,6 +217,7 @@ function openJobDeck(jobId) {
     save();
   }
   activeDay = i;
+  save();
   startSession();
 }
 
@@ -426,7 +432,7 @@ function finish() {
 }
 
 $('pick-day').addEventListener('click', () => { renderDays(); show('days'); });
-$('more-jobs').addEventListener('click', () => { renderJobs(); show('jobs'); });
+$('more-jobs').addEventListener('click', () => { refreshResume(); renderJobs(); show('home'); });
 $('restart').addEventListener('click', () => { paste.value = ''; $('go-parse').disabled = true; show('import'); });
 
 /* ══════ speech ══════ */
@@ -500,7 +506,7 @@ function judge() {
 
 /* ══════ settings ══════ */
 $('go-settings').addEventListener('click', openSettings);
-$('back-settings').addEventListener('click', () => show('import'));
+$('back-settings').addEventListener('click', () => show('home'));
 
 function openSettings() {
   const p = T.provider();
@@ -526,22 +532,48 @@ $('save-key').addEventListener('click', () => {
 
 $('wipe').addEventListener('click', () => {
   if (!confirm('저장된 카드와 진도를 모두 지웁니다. 되돌릴 수 없습니다.')) return;
-  state = { me: null, roomTitle: null, days: [], usingSample: false };
+  state = { me: null, roomTitle: null, days: [], usingSample: false, job: null, seen: false };
   try { localStorage.removeItem(STORE); } catch { /* private mode */ }
   parsed = null;
-  $('go-resume').classList.add('hide');
+  refreshResume();
+  renderJobs();
+  show('welcome');
+});
+
+/* ══════ welcome ══════ */
+/* First run asks one question — what do you do — and answering it drops you
+   straight into a deck. Anything more elaborate is a wall in front of the
+   thing people came to do. */
+function renderWelcome() {
+  $('welcome-jobs').innerHTML = JOB_DECKS.map((d) => `<button class="day" data-job="${esc(d.id)}">
+      <i class="pip"></i>
+      <span class="when"><b>${esc(d.name)}</b><span>${esc(d.blurb)}</span></span>
+      <span class="n">${d.cards.length}장</span>
+    </button>`).join('');
+  for (const b of $('welcome-jobs').querySelectorAll('.day')) {
+    b.addEventListener('click', () => openJobDeck(b.dataset.job));
+  }
+}
+
+$('welcome-skip').addEventListener('click', () => {
+  state.seen = true;
+  save();
   show('import');
 });
 
 /* ══════ boot ══════ */
-const saved = load();
-if (saved) {
-  state = { ...state, ...saved };
+function refreshResume() {
   const remaining = state.days.filter((d) => dayStatus(d) !== 'done').length;
+  $('go-resume').classList.toggle('hide', !state.days.length);
   $('go-resume').textContent = remaining ? `이어서 하기 · ${remaining}일 남음` : `복습하기 · ${state.days.length}일치`;
-} else {
-  $('go-resume').classList.add('hide');
 }
+
+const saved = load();
+if (saved) state = { ...state, ...saved };
+refreshResume();
+renderJobs();
+renderWelcome();
+show(saved ? 'home' : 'welcome');
 
 T.detect();
 

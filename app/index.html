@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#2952e3">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" href="icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="K-직장인 영어">
 </head>
@@ -18,20 +19,47 @@
 
 <div id="app">
 
-  <!-- ══════ IMPORT ══════ -->
-  <section class="screen on" id="s-import">
+  <!-- ══════ WELCOME — first run only ══════ -->
+  <section class="screen" id="s-welcome">
+    <div class="masthead">
+      <div class="wordmark"><i class="dot"></i><span>K-직장인 영어</span></div>
+      <h1>어떤 일 하세요?</h1>
+      <p class="small">고르시면 그 일에서 매일 쓰는 표현 <b>40장</b>이 바로 준비됩니다. 준비물도, 가입도 없습니다. 다른 직무는 나중에 언제든 볼 수 있어요.</p>
+    </div>
+
+    <div class="stack" style="min-height:0">
+      <div class="days" id="welcome-jobs"></div>
+      <button class="btn ghost wide" id="welcome-skip">직무 말고 내 카톡 대화로 시작할래요</button>
+    </div>
+  </section>
+
+  <!-- ══════ HOME ══════ -->
+  <section class="screen on" id="s-home">
     <div class="masthead">
       <div class="wordmark"><i class="dot"></i><span>K-직장인 영어</span></div>
       <h1>회사에서 맨날 쓰는 그 말,<br>영어로는 뭐라고 하지?</h1>
       <p class="small">“확인하고 말씀드릴게요”, “조금 늦어질 것 같아요” — 교재에 안 나오는데 매일 쓰는 말들. <b>하루 5분</b>, 아는 건 오른쪽 모르는 건 왼쪽으로 넘기면 됩니다.</p>
     </div>
 
-    <div class="stack">
+    <div class="stack" style="min-height:0">
       <button class="btn wide" id="go-resume">이어서 하기</button>
-      <button class="btn wide" id="go-jobs">내 직무 표현으로 시작하기</button>
+      <div class="days" id="job-list"></div>
+      <button class="btn ghost wide" id="go-import">내 카톡 대화로 만들기</button>
+      <button class="btn ghost wide" id="go-settings">설정</button>
+    </div>
+  </section>
 
+  <!-- ══════ IMPORT ══════ -->
+  <section class="screen" id="s-import">
+    <div class="topbar">
+      <button class="iconbtn" id="back-home" aria-label="뒤로">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h2>내 카톡으로 만들기</h2>
+    </div>
+
+    <div class="stack">
       <div class="panel">
-        <h2>내 카톡으로 만들기</h2>
         <p class="small">진짜 내 말로 하고 싶으면 — 어제 단톡방 대화가 그대로 카드가 됩니다.</p>
         <dl class="howto">
           <dt>1</dt><dd>카톡 대화방 → 메뉴(≡) → <b>대화 내용 내보내기</b> → 텍스트만</dd>
@@ -49,14 +77,13 @@
       </div>
 
       <div class="note"><b>대화는 이 기기 안에서 읽습니다.</b> 파일은 어디에도 업로드되지 않습니다. 그날 연습할 문장과 앞뒤 맥락만 번역을 위해 전송됩니다.</div>
-      <button class="btn ghost wide" id="go-settings">설정</button>
     </div>
   </section>
 
   <!-- ══════ PREVIEW ══════ -->
   <section class="screen" id="s-preview">
     <div class="topbar">
-      <button class="iconbtn" id="back-import" aria-label="뒤로">
+      <button class="iconbtn" id="back-preview" aria-label="뒤로">
         <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
       <h2>이렇게 읽었습니다</h2>
@@ -75,21 +102,6 @@
       </div>
       <button class="btn wide" id="go-days">날짜별로 나누기</button>
       <p class="small" id="build-note"></p>
-    </div>
-  </section>
-
-  <!-- ══════ JOB DECKS ══════ -->
-  <section class="screen" id="s-jobs">
-    <div class="topbar">
-      <button class="iconbtn" id="back-jobs" aria-label="뒤로">
-        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-      <h2>어떤 일 하세요?</h2>
-    </div>
-    <div class="stack" style="gap:16px; min-height:0">
-      <p class="small">직무별로 자주 쓰는 표현을 모아뒀습니다. 골라서 바로 시작하세요 — 카톡 안 넣어도 됩니다.</p>
-      <div class="days" id="job-list"></div>
-      <div class="note">이 표현들은 누군가의 실제 대화가 아니라 <b>직무별로 새로 쓴 문장</b>입니다. 남의 단톡방 내용은 들어가지 않습니다.</div>
     </div>
   </section>
 
