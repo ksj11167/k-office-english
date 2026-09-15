@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">말한 대로 영어</string>
-    <string name="title_activity_main">말한 대로 영어</string>
+    <string name="app_name">K-직장인 영어</string>
+    <string name="title_activity_main">K-직장인 영어</string>
     <string name="package_name">com.ksj11167.realtalkenglish</string>
     <string name="custom_url_scheme">com.ksj11167.realtalkenglish</string>
 </resources>
