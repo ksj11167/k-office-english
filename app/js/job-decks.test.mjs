@@ -17,6 +17,14 @@ test('every deck has an id, a name, a blurb and cards', () => {
   }
 });
 
+test('every deck carries the v1 minimum of 40 cards', () => {
+  // PRD §4: twelve cards a job runs out in two days. Forty is the floor for
+  // shipping, and a floor nobody checks is a floor that quietly sinks.
+  for (const d of JOB_DECKS) {
+    assert.ok(d.cards.length >= 40, `deck ${d.id} has ${d.cards.length} cards, needs 40`);
+  }
+});
+
 test('deck ids are unique', () => {
   const ids = JOB_DECKS.map((d) => d.id);
   assert.equal(new Set(ids).size, ids.length);
