@@ -95,8 +95,10 @@ npx http-server app -p 8787
 
 **GitHub Pages** — `main`에 `app/**`가 바뀌면 자동 배포된다
 (`.github/workflows/pages.yml`). 레포 Settings → Pages → Source를
-**GitHub Actions**로 한 번 바꿔주면 된다. 여기서는 설치형 PWA로 동작하고,
-번역은 설정 화면에 본인 Anthropic API 키를 넣어야 한다.
+**GitHub Actions**로 한 번 바꿔주면 된다 — 이 한 번은 사람이 해야 한다.
+워크플로에 `enablement: true`를 줘봤지만 Actions 토큰은 Pages 사이트를 *만들* 권한이
+없다(`Resource not accessible by integration`). 만들어진 뒤로는 배포가 자동이다.
+여기서는 설치형 PWA로 동작하고, 번역은 설정 화면에 본인 Anthropic API 키를 넣어야 한다.
 
 **Claude 아티팩트** — `claude.use("sample")`로 뷰어의 Claude에 직접 번역을
 요청하므로 키가 필요 없다. 아티팩트 플랫폼이 자체 `<head>`를 씌우기 때문에

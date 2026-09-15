@@ -33,6 +33,9 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      # Pages must already be switched on in Settings: GITHUB_TOKEN can deploy to
+      # an existing site but cannot create one (enablement: true comes back
+      # "Resource not accessible by integration"), so this step only configures.
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
