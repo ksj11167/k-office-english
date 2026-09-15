@@ -75,8 +75,7 @@ docs/decisions.md           확정된 결정 · 가정 · 인터뷰 기록
 ## 테스트
 
 ```bash
-npm test                               # 파서 23개
-node app/js/job-decks.test.mjs         # 덱 데이터 9개
+npm test        # 파서 23개 + 덱 데이터 10개
 ```
 
 파서는 앱의 심장이고 카톡 포맷은 안정적인 계약이 아니다(Android 대괄호 형식과 iOS

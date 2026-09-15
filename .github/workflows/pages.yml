@@ -23,7 +23,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node app/js/kakao-parser.test.mjs
+      - run: npm test
 
   deploy:
     needs: test

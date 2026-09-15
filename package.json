@@ -5,7 +5,7 @@
   "description": "카톡 대화를 날짜별로 나눠 하루치씩, 내가 실제로 쓴 문장으로 영어 말하기를 연습하는 앱",
   "type": "module",
   "scripts": {
-    "test": "node app/js/kakao-parser.test.mjs",
+    "test": "node app/js/kakao-parser.test.mjs && node app/js/job-decks.test.mjs",
     "artifact": "node tools/make-artifact.mjs",
     "sync": "cap sync",
     "android": "cap run android",
