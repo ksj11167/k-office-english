@@ -9,7 +9,7 @@
  * cache-first and fall back to the network. API and font requests are left
  * alone; fonts are cached opportunistically as they are fetched.
  */
-const VERSION = 'rte-v1';
+const VERSION = 'rte-v2';
 const SHELL = [
   './',
   './index.html',
@@ -20,7 +20,10 @@ const SHELL = [
   './js/srs.js',
   './js/swipe.js',
   './js/translate.js',
+  './js/job-decks.js',
+  './js/platform.js',
   './vendor/ts-fsrs.mjs',
+  './privacy.html',
   './icons/icon-192.png',
   './icons/icon-512.png',
 ];
