@@ -64,18 +64,23 @@ app/                        배포 대상 (빌드 불필요, 정적 파일)
     translate.js            번역 제공자 (Claude 아티팩트 | 본인 API 키)
     platform.js             네이티브/웹 한 겹 (공유시트 · 음성 인식)
     job-decks.js            직무별 기본 표현집 (앱에 내장, 백엔드 없음)
+  privacy.html              개인정보 처리방침 (docs/privacy.md에서 생성)
   vendor/ts-fsrs.mjs
 android/  ios/              Capacitor 네이티브 셸 (cap sync가 app/을 복사)
 capacitor.config.json
 tools/make-artifact.mjs     app/index.html → Claude 아티팩트용 파일
+tools/make-privacy.mjs      docs/privacy.md → app/privacy.html
+tools/screenshots.mjs       실제 앱을 구동해 스토어 규격 스크린샷 생성
+store/                      스토어 스크린샷 · 등록 문안 · 심사 노트
 docs/prd.md                 v1 범위 · 타겟 · 성공 지표 · 비범위
 docs/decisions.md           확정된 결정 · 가정 · 인터뷰 기록
+docs/privacy.md             개인정보 처리방침 원본
 ```
 
 ## 테스트
 
 ```bash
-npm test        # 파서 23개 + 덱 데이터 10개
+npm test        # 파서 23개 + 덱 데이터 10개 + 오프라인 셸 4개
 ```
 
 파서는 앱의 심장이고 카톡 포맷은 안정적인 계약이 아니다(Android 대괄호 형식과 iOS
