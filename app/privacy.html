@@ -4,54 +4,116 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>개인정보 처리방침 — K-직장인 영어</title>
-<!-- GENERATED FROM docs/privacy.md BY tools/make-privacy.mjs — DO NOT EDIT -->
 <link rel="stylesheet" href="styles.css">
 <style>
-  .doc { max-width: 40rem; margin: 0 auto; padding: 32px 18px 64px; }
-  .doc h1 { margin-bottom: 4px; }
-  .doc h2 { margin-top: 34px; }
-  .doc h3 { margin-top: 24px; }
-  .doc p { margin: 0 0 13px; }
-  .doc p, .doc li { color: var(--ink-2); line-height: 1.65; }
-  .doc ul { padding-left: 20px; }
+  .doc { max-width: 680px; margin: 0 auto; padding: 32px 20px 64px; }
+  .doc h1 { margin-bottom: 8px; }
+  .doc h2 { margin-top: 34px; margin-bottom: 10px; }
+  .doc p, .doc li { color: var(--ink-2); font-size: 15px; line-height: 1.65; }
+  .doc ul { padding-left: 20px; margin: 10px 0; }
   .doc li { margin-bottom: 6px; }
   .doc table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 14px; }
   .doc th, .doc td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  .doc th { color: var(--muted); font-weight: 600; }
-  .doc code { font-family: var(--mono); font-size: .92em; background: var(--surface-2); padding: 1px 5px; border-radius: 5px; }
-  .doc a { color: var(--accent); }
-  .back { display: inline-block; margin-top: 40px; color: var(--muted); font-size: 13.5px; }
+  .doc th { color: var(--ink); font-weight: 600; }
+  .doc .updated { font-family: var(--mono); font-size: 12px; color: var(--muted); }
 </style>
 </head>
 <body>
 <main class="doc">
-<h1>개인정보 처리방침 — K-직장인 영어</h1>
-<p>최종 수정: 2026년 9월 16일</p>
-<p>이 앱은 <b>계정이 없습니다.</b> 가입도 로그인도 없고, 저희는 이용자를 식별할 수 있는 정보를 수집하지 않습니다. 운영하는 서버도 없습니다.</p>
-<h2>1. 기기에만 남는 것</h2>
-<p>학습 카드와 진도(어떤 카드를 언제 다시 볼지)는 <b>이용자 기기의 브라우저 저장소</b>에만 저장됩니다. 저희 서버로 전송되지 않고, 다른 기기와 동기화되지 않습니다. 앱을 삭제하거나 설정 화면의 <b>"카드와 진도 모두 지우기"</b>를 누르면 함께 사라집니다.</p>
-<h2>2. 카카오톡 대화 파일</h2>
-<p>이용자가 직접 고른 대화 내보내기 <code>.txt</code> 파일은 <b>기기 안에서 읽고 분석합니다.</b> 파일 자체는 어디에도 업로드되지 않습니다.</p>
-<p>번역 기능을 쓸 때만, <b>그날 연습할 문장과 그 앞뒤 맥락 몇 줄</b>이 번역을 위해 전송됩니다. 전송되는 곳은 이용자가 선택한 번역 제공자입니다:</p>
-<table><thead><tr><th>앱을 어디서 쓰는가</th><th>문장이 가는 곳</th></tr></thead><tbody><tr><td>Claude 아티팩트</td><td>이용자 본인의 Claude 세션 (Anthropic)</td></tr><tr><td>웹 / 앱, 본인 API 키 입력</td><td><code>api.anthropic.com</code> (Anthropic)</td></tr><tr><td>번역 미설정</td><td>전송 없음 — 번역 기능이 동작하지 않습니다</td></tr></tbody></table>
-<p>대화 전체 로그, 대화방 이름, 참여자 이름, 날짜는 <b>전송되지 않습니다.</b></p>
-<p>API 키를 입력한 경우 그 키는 <b>이용자 브라우저에만</b> 저장되며 <code>api.anthropic.com</code> 외의 어디로도 전송되지 않습니다. 공용 기기에서는 사용하지 마세요.</p>
-<h2>3. 마이크와 음성 인식</h2>
-<p>말하기 연습에서 마이크 버튼을 누른 동안에만 음성을 받습니다. 녹음 파일은 저장하지 않으며, 인식된 텍스트는 카드의 정답과 비교한 뒤 화면을 벗어나면 사라집니다.</p>
-<p>처리 위치는 실행 환경에 따라 다릅니다:</p>
-<ul><li><b>iOS / Android 앱</b> — 기기 안에서 처리됩니다 (온디바이스 음성 인식). 음성이</li></ul>
-<p>  기기를 벗어나지 않습니다</p>
-<ul><li><b>웹 브라우저</b> — 브라우저의 음성 인식 기능을 사용합니다. **Chrome은 오디오를</li></ul>
-<p>  Google 서버로 전송합니다.** 이것이 마음에 걸리면 앱 버전을 쓰시거나, 마이크 대신   정답 보기로 스스로 채점하시면 됩니다</p>
-<h2>4. 수집하지 않는 것</h2>
-<ul><li>이름, 이메일, 전화번호, 생년월일 등 신원 정보</li><li>위치</li><li>광고 식별자</li><li>분석·트래킹 도구 (앱에 분석 SDK가 <b>전혀</b> 들어 있지 않습니다)</li><li>크래시 리포트</li></ul>
-<h2>5. 제3자 제공</h2>
-<p>없습니다. 2절에 적은 번역 요청 외에 어떤 데이터도 외부로 나가지 않으며, 누구에게도 판매하거나 공유하지 않습니다.</p>
-<h2>6. 아동</h2>
-<p>만 14세 미만을 대상으로 하지 않으며, 아동의 정보를 의도적으로 수집하지 않습니다.</p>
-<h2>7. 문의</h2>
-<p>ksj11167@gmail.com</p>
-<a class="back" href="index.html">← 앱으로 돌아가기</a>
+
+<p style="margin-bottom:22px"><a href="./" style="color:var(--accent);font-size:14px;font-weight:600;text-decoration:none">← 앱으로 돌아가기</a></p>
+
+<h1>개인정보 처리방침</h1>
+<p class="updated">K-직장인 영어 · 최종 수정 2026-09-16</p>
+
+<p>이 앱은 카카오톡 대화 내보내기 파일을 영어로 옮기고, 그 중 사용자가 한 말을 말하기
+연습 카드로 만듭니다. 다루는 내용이 사적인 대화이므로, 무엇을 보내고 무엇을 안 보내는지
+구체적으로 적습니다.</p>
+
+<h2>한 줄 요약</h2>
+<p><b>계정이 없고, 서버에 대화를 저장하지 않으며, 광고와 분석 도구를 넣지 않았습니다.</b>
+대화는 기기 안에서 읽고, 영어로 옮기는 그 순간에만 번역 제공자에게 전송됩니다.</p>
+
+<h2>수집하지 않는 것</h2>
+<ul>
+  <li>이름, 이메일, 전화번호, 생년월일 등 어떤 개인 식별 정보도 받지 않습니다. 회원가입이 없습니다</li>
+  <li>연락처, 사진, 위치, 통화 기록에 접근하지 않습니다</li>
+  <li>광고 식별자를 읽지 않고, 광고·분석 SDK를 넣지 않았습니다</li>
+  <li>대화 내용을 서버에 저장하지 않습니다</li>
+</ul>
+
+<h2>기기 안에만 남는 것</h2>
+<table>
+  <tr><th>무엇</th><th>어디</th><th>언제 사라지나</th></tr>
+  <tr><td>불러온 대화와 영어 번역</td><td>기기 브라우저 저장소</td><td>앱에서 «모두 지우기» 또는 앱 삭제</td></tr>
+  <tr><td>카드별 복습 일정</td><td>기기 브라우저 저장소</td><td>위와 같음</td></tr>
+  <tr><td>직접 넣은 API 키(선택)</td><td>기기 브라우저 저장소</td><td>위와 같음</td></tr>
+</table>
+<p>이 데이터는 기기를 떠나지 않습니다. 기기 간 동기화 기능이 없고, 따라서 사용자의 카드를
+다른 곳에서 볼 방법이 없습니다 — 개발자도 마찬가지입니다.</p>
+
+<h2>번역할 때 전송되는 것</h2>
+<p>영어로 옮기려면 그 날 대화 문장이 언어 모델에 전달되어야 합니다. 이때 전송되는 것은
+<b>선택한 날짜의 대화 텍스트와 발화자 표시 이름</b>뿐입니다. 전화번호, 프로필, 대화방
+식별자, 첨부 파일은 전송되지 않습니다. 사진·이모티콘 등은 자리표시자로만 남고 번역
+대상이 아닙니다.</p>
+
+<p>전송 경로는 셋 중 하나이며, 앱이 어디서 실행되는지에 따라 정해집니다.</p>
+<table>
+  <tr><th>경로</th><th>어디로</th><th>보관</th></tr>
+  <tr><td>앱 기본(번역 서버)</td><td>운영자의 프록시 서버 → Anthropic</td><td>프록시는 대화를 저장하지 않습니다</td></tr>
+  <tr><td>본인 API 키 입력 시</td><td>기기 → Anthropic 직접</td><td>운영자를 거치지 않습니다</td></tr>
+  <tr><td>Claude 아티팩트로 열었을 때</td><td>보는 사람 본인의 Claude</td><td>운영자를 거치지 않습니다</td></tr>
+</table>
+
+<h3>번역 서버가 남기는 기록</h3>
+<p>프록시 서버는 <b>대화 내용을 기록하지 않습니다.</b> 프롬프트도, 응답도, 오류가 났을 때도
+남기지 않습니다. 남기는 것은 남용을 막기 위한 하루치 요청 횟수 하나이며, 그 횟수는
+IP 주소가 아니라 <b>서버 비밀값을 섞어 해시한 값</b>에 대해 셉니다. 이 값은 되돌려 IP를
+알아낼 수 없고 48시간 뒤 자동 삭제됩니다.</p>
+
+<h3>Anthropic으로 전달되는 부분</h3>
+<p>번역은 Anthropic의 Claude 모델이 수행합니다. 전달된 내용의 처리는 Anthropic이
+API 이용자에게 적용하는 약관과 개인정보 방침을 따릅니다
+(<a href="https://www.anthropic.com/legal/privacy">anthropic.com/legal/privacy</a>).
+이 부분은 운영자가 통제하지 않으며, 운영자가 Anthropic 측의 데이터 처리에 대해
+별도로 설정하는 값은 없습니다.</p>
+
+<h2>음성 인식</h2>
+<p>말하기 채점은 기기의 음성 인식을 사용합니다. 처리 위치는 실행 환경에 따라 다르며,
+이 차이는 앱이 통제할 수 없습니다.</p>
+<ul>
+  <li><b>iOS·Android 앱</b>에서는 기기 안에서 처리됩니다. 음성이 기기를 떠나지 않습니다</li>
+  <li><b>웹 브라우저</b>에서는 브라우저가 정합니다. 특히 <b>Chrome은 음성을 구글 서버로 전송합니다</b></li>
+</ul>
+<p>녹음 파일은 어떤 경우에도 앱이 저장하지 않으며, 인식된 문자열은 채점 직후 버려집니다.</p>
+
+<h2>대화 상대방에 대하여</h2>
+<p>대화에는 동의한 적 없는 상대방의 발화가 포함됩니다. 이 점을 고려해 앱은 다음을 지킵니다.</p>
+<ul>
+  <li>대화 원문은 <b>다른 사용자에게 공유되지 않습니다.</b> 공유 기능 자체가 없습니다</li>
+  <li>대화를 서버에 저장하지 않으므로, 유출될 저장본이 존재하지 않습니다</li>
+  <li>번역 목적 외로 사용하지 않습니다</li>
+</ul>
+<p>다만 대화를 불러오는 행위 자체는 사용자의 선택입니다. 직장 단체 대화방 등 민감한
+내용이 포함된 대화를 불러올지는 사용자가 판단해 주시기 바랍니다.</p>
+
+<h2>만 14세 미만</h2>
+<p>이 앱은 직장인을 대상으로 하며 만 14세 미만 아동을 대상으로 하지 않습니다.
+아동의 개인정보를 의도적으로 수집하지 않습니다.</p>
+
+<h2>권리와 삭제</h2>
+<p>모든 데이터가 기기에만 있으므로, 설정 화면의 <b>«대화와 진도 모두 지우기»</b> 또는 앱
+삭제로 즉시 전부 삭제됩니다. 서버에 보관된 사용자 데이터가 없어 별도의 삭제 요청
+절차가 필요하지 않습니다.</p>
+
+<h2>변경</h2>
+<p>이 방침이 바뀌면 이 페이지의 최종 수정일이 갱신됩니다. 수집 항목이 늘어나는 변경은
+앱 안에서 별도로 알립니다.</p>
+
+<h2>문의</h2>
+<p>이 방침이나 데이터 처리에 대한 문의: <b>ksj11167@gmail.com</b></p>
+
 </main>
 </body>
 </html>

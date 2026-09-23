@@ -29,6 +29,72 @@ export const isNative = () => Boolean(cap()?.isNativePlatform?.());
 /** 'ios' | 'android' | 'web' */
 export const platform = () => cap()?.getPlatform?.() || 'web';
 
+/* ─────────── speaking the answer aloud ─────────── */
+
+/**
+ * Read an English sentence out loud.
+ *
+ * A tester asked for this and the reason is obvious in hindsight: the app asks
+ * people to say a sentence they have never heard. Reading it silently tells you
+ * the words, not the shape of them.
+ *
+ * speechSynthesis is in every browser this app runs in and inside the Capacitor
+ * WebView, so there is no native plugin here — but it is quietly unreliable.
+ * Voices load asynchronously and the list is empty on the first call in most
+ * browsers, so picking a voice has to wait for `voiceschanged`. Safari also
+ * stays "speaking" after an utterance is cancelled, so every call cancels first.
+ *
+ * @returns {{available: () => boolean, speak: (text: string) => Promise<void>, stop: () => void}}
+ */
+export function createSpeaker() {
+  const synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
+  if (!synth) {
+    return { available: () => false, speak: async () => {}, stop: () => {} };
+  }
+
+  let voice = null;
+  const pick = () => {
+    const all = synth.getVoices();
+    if (!all.length) return null;
+    const en = all.filter((v) => /^en([-_]|$)/i.test(v.lang || ''));
+    const pool = en.length ? en : all;
+    // Prefer a US voice, then any English one; a local voice avoids a network
+    // round trip and keeps working on a train.
+    return pool.find((v) => /^en[-_]US/i.test(v.lang) && v.localService)
+      || pool.find((v) => /^en[-_]US/i.test(v.lang))
+      || pool.find((v) => v.localService)
+      || pool[0]
+      || null;
+  };
+
+  voice = pick();
+  if (!voice) synth.addEventListener?.('voiceschanged', () => { voice = pick(); }, { once: true });
+
+  return {
+    available: () => true,
+    stop: () => { try { synth.cancel(); } catch { /* nothing was speaking */ } },
+    speak(text) {
+      return new Promise((resolve) => {
+        const line = String(text || '').trim();
+        if (!line) return resolve();
+        try {
+          synth.cancel();                       // Safari stalls without this
+          const u = new SpeechSynthesisUtterance(line);
+          if (!voice) voice = pick();
+          if (voice) u.voice = voice;
+          u.lang = (voice && voice.lang) || 'en-US';
+          u.rate = 0.92;                        // a shade under natural, to copy
+          u.onend = () => resolve();
+          u.onerror = () => resolve();          // silence is not worth an error
+          synth.speak(u);
+        } catch {
+          resolve();
+        }
+      });
+    },
+  };
+}
+
 /* ─────────── share target ─────────── */
 
 /**
@@ -42,7 +108,22 @@ export const platform = () => cap()?.getPlatform?.() || 'web';
 export async function onSharedChatExport(handler) {
   const share = plugin('CapacitorShareTarget');
   const fs = plugin('Filesystem');
-  if (!share) return () => {};
+
+  // Web: an installed PWA on Android can be a share target. The share arrives
+  // as a POST that the service worker catches and stashes, and the browser is
+  // sent back here with ?shared=1 — so this is a one-shot pickup, not a stream.
+  if (!share) {
+    if (!/[?&]shared=1/.test(location.search)) return () => {};
+    try {
+      const res = await caches.match('./__shared-export');
+      const text = res ? await res.text() : '';
+      // Clear both the stash and the query string so a reload does not re-import.
+      for (const k of await caches.keys()) (await caches.open(k)).delete('./__shared-export');
+      history.replaceState(null, '', location.pathname);
+      if (text.trim()) handler(text, 'shared.txt');
+    } catch { /* no cache access; the file input still works */ }
+    return () => {};
+  }
 
   const sub = await share.addListener('shareReceived', async (event) => {
     // A share arrives either as plain text or as the exported .txt file.

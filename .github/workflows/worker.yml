@@ -1,0 +1,76 @@
+name: Deploy translation proxy
+
+# Deploying from here rather than from a laptop is the point: everything the
+# proxy needs lives in repository settings, so setting it up is filling in
+# fields on a web page instead of installing a toolchain and typing commands.
+on:
+  push:
+    branches: [main]
+    paths: ['server/**', '.github/workflows/worker.yml']
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+
+      - name: Check the settings are filled in
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          ANTHROPIC: ${{ secrets.ANTHROPIC_API_KEY }}
+          SALT: ${{ secrets.QUOTA_SALT }}
+          KV_ID: ${{ vars.CLOUDFLARE_KV_ID }}
+        run: |
+          missing=""
+          [ -n "$CF_TOKEN" ]   || missing="$missing CLOUDFLARE_API_TOKEN"
+          [ -n "$CF_ACCOUNT" ] || missing="$missing CLOUDFLARE_ACCOUNT_ID"
+          [ -n "$ANTHROPIC" ]  || missing="$missing ANTHROPIC_API_KEY"
+          [ -n "$SALT" ]       || missing="$missing QUOTA_SALT"
+          [ -n "$KV_ID" ]      || missing="$missing CLOUDFLARE_KV_ID(변수)"
+          if [ -n "$missing" ]; then
+            echo "::error::설정이 비어 있습니다:$missing — server/README.md 참조"
+            exit 1
+          fi
+          echo "설정 5개 전부 채워져 있습니다."
+
+      - name: Warn if the key does not look like an Anthropic key
+        env: { ANTHROPIC: "${{ secrets.ANTHROPIC_API_KEY }}" }
+        run: |
+          case "$ANTHROPIC" in
+            sk-ant-*) echo "키 형식 확인됨." ;;
+            *) echo "::warning::ANTHROPIC_API_KEY가 sk-ant- 로 시작하지 않습니다. 잘못 붙여넣었을 수 있습니다." ;;
+          esac
+
+      - run: node server/worker.test.mjs
+
+      # The namespace id is not a secret, but it is account-specific, so it
+      # comes from a repository variable rather than being committed.
+      - name: Point wrangler at this account's KV namespace
+        env:
+          KV_ID: ${{ vars.CLOUDFLARE_KV_ID }}
+        run: |
+          sed -i "s|REPLACE_ME|$KV_ID|" server/wrangler.toml
+          grep -n 'id =' server/wrangler.toml
+
+      - uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: server
+          # Uploaded with `wrangler secret put`, so they live in Cloudflare and
+          # never appear in the worker's source or in this log.
+          secrets: |
+            ANTHROPIC_API_KEY
+            QUOTA_SALT
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          QUOTA_SALT: ${{ secrets.QUOTA_SALT }}
+
+      - name: What to do next
+        run: |
+          echo "배포됐습니다. 워커 주소를 저장소 변수 PROXY_URL 에 넣으면"
+          echo "앱이 그 서버로 번역합니다 (Settings → Secrets and variables → Actions → Variables)."

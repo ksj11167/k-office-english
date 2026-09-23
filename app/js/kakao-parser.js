@@ -156,46 +156,81 @@ function closeAll(messages) {
 }
 
 /**
- * Turn parsed messages into study candidates.
+ * Group every message into one deck per calendar day.
  *
- * Every one of my own text utterances becomes a card, in conversation order and
- * unedited — the deck is not curated by frequency or difficulty. Each card
- * carries the few preceding turns (the other party's included) so the
- * translation can resolve deictics like "그거" instead of guessing.
+ * A day is the unit of study, and since D18 it is also the unit of translation:
+ * the whole day goes to the model in one pass, not just my own lines. Grouping
+ * before translating is what makes the date boundary (D14) structural instead of
+ * a rule someone has to remember — a day's messages simply cannot reach into
+ * another day's, because they are not in the same array.
+ *
+ * Media placeholders stay in the group. They are not translated and never become
+ * cards, but dropping them here would silently rewrite the conversation someone
+ * is about to read.
  *
  * @param {object} parsed result of parseKakaoExport
+ * @returns {{date: string, label: string,
+ *            messages: {id: string, speaker: string, ko: string,
+ *                       media: boolean, minutes: number|null}[]}[]}
+ */
+export function groupByDay(parsed) {
+  const days = new Map();
+  parsed.messages.forEach((m, idx) => {
+    const key = m.date || '날짜 미상';
+    if (!days.has(key)) days.set(key, []);
+    days.get(key).push({
+      id: 'm' + idx,
+      speaker: m.speaker,
+      ko: m.text.trim(),
+      media: m.media,
+      minutes: m.minutes,
+    });
+  });
+  return [...days.entries()]
+    .map(([date, messages]) => ({ date, label: date, messages, sort: dateSortKey(date) }))
+    .sort((a, b) => b.sort - a.sort)
+    .map(({ date, label, messages }) => ({ date, label, messages }));
+}
+
+/**
+ * Pick my lines out of an already-translated day and turn them into cards.
+ *
+ * Runs after translation, not before (D19). Every one of my text utterances
+ * becomes a card, in conversation order and unedited — the deck is not curated
+ * by frequency or difficulty (D2).
+ *
+ * Each card carries the few preceding turns, and those now hold English as well
+ * as Korean, so the card reads as an English conversation with my turn missing.
+ *
+ * @param {object[]} messages one day's messages, each with `en` filled in
  * @param {string} me the speaker name to study
  * @param {{contextTurns?: number, minChars?: number}} [opts]
  */
-export function buildCandidates(parsed, me, opts = {}) {
+export function cardsForSpeaker(messages, me, opts = {}) {
   const contextTurns = opts.contextTurns ?? 3;
   // 1, not 2: the deck is deliberately uncurated, so "넵" earns a card like
   // anything else. Only genuinely empty text is dropped.
   const minChars = opts.minChars ?? 1;
   const out = [];
 
-  parsed.messages.forEach((m, idx) => {
+  messages.forEach((m, idx) => {
     if (m.speaker !== me) return;
     if (m.media) return;
-    const text = m.text.trim();
-    if (text.length < minChars) return;
+    if (m.ko.length < minChars) return;
 
-    // Context never crosses a date boundary: the last thing said on Friday is
-    // not context for the first thing said on Sunday, and feeding it to the
-    // translator (or showing it on the card) is actively misleading.
     const context = [];
     for (let j = Math.max(0, idx - contextTurns); j < idx; j++) {
-      const c = parsed.messages[j];
+      const c = messages[j];
       if (c.media) continue;
-      if (c.date !== m.date) continue;
-      context.push({ speaker: c.speaker, text: c.text.trim(), mine: c.speaker === me });
+      context.push({ speaker: c.speaker, ko: c.ko, en: c.en || '', mine: c.speaker === me });
     }
 
     out.push({
-      id: 'c' + idx,
-      ko: text,
+      id: m.id,
+      ko: m.ko,
+      en: m.en || '',
+      situation: m.situation || '대화',
       context,
-      date: m.date,
       minutes: m.minutes,
     });
   });
@@ -203,29 +238,16 @@ export function buildCandidates(parsed, me, opts = {}) {
   return out;
 }
 
-/**
- * Group candidates into one deck per calendar day.
- *
- * A day is the unit of study: a single export can cover months, and translating
- * or drilling all of it at once is the thing that makes a deck feel impossible.
- * Splitting by day keeps every utterance (nothing is curated away) while making
- * a session finite — and it costs one small translation call instead of one huge
- * one. Days come back newest first, which is the order someone wants to study.
- *
- * @param {{id: string, ko: string, date: string|null}[]} candidates
- * @returns {{date: string, label: string, cards: object[]}[]}
- */
-export function groupByDay(candidates) {
-  const days = new Map();
-  for (const c of candidates) {
-    const key = c.date || '날짜 미상';
-    if (!days.has(key)) days.set(key, []);
-    days.get(key).push(c);
+/** Speakers present in one day, most talkative first. */
+export function speakersIn(messages) {
+  const counts = new Map();
+  for (const m of messages) {
+    if (m.media) continue;
+    counts.set(m.speaker, (counts.get(m.speaker) || 0) + 1);
   }
-  return [...days.entries()]
-    .map(([date, cards]) => ({ date, label: date, cards, sort: dateSortKey(date) }))
-    .sort((a, b) => b.sort - a.sort)
-    .map(({ date, label, cards }) => ({ date, label, cards }));
+  return [...counts.entries()]
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count);
 }
 
 /** Sortable number from "2024년 3월 11일"; unknown dates sink to the bottom. */

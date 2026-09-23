@@ -1,0 +1,33 @@
+name: Tests
+
+# The unit suites cover the parser and the deck data. The browser walk covers
+# what they structurally cannot: a screen that never appears, a button wired to
+# an id that no longer exists, progress that does not survive a reload.
+on:
+  push:
+    branches: [main, 'claude/**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: npm ci
+      - run: npm test
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      # The seam between the app and the proxy — the path every ordinary user
+      # takes, and the one neither side's own tests covered.
+      - run: npm run test:proxy

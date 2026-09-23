@@ -3,7 +3,7 @@ name: Deploy app to GitHub Pages
 on:
   push:
     branches: [main]
-    paths: ['app/**', '.github/workflows/pages.yml']
+    paths: ['app/**', 'site/**', '.github/workflows/pages.yml']
   workflow_dispatch:
 
 permissions:
@@ -23,6 +23,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: npm ci
       - run: npm test
 
   deploy:
@@ -33,12 +34,34 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      # Pages must already be switched on in Settings: GITHUB_TOKEN can deploy to
-      # an existing site but cannot create one (enablement: true comes back
-      # "Resource not accessible by integration"), so this step only configures.
       - uses: actions/configure-pages@v5
+
+      # app/ is what Capacitor wraps into the APK, so nothing that only belongs
+      # on the web may live there — the landing page and its screenshots were
+      # 71% of the bundle and unreachable from inside the app. They live in
+      # site/ and are merged in here, where both are served from one root so
+      # the relative links between them still resolve.
+      - name: Compose the published site
+        run: |
+          mkdir -p _site
+          cp -r app/. _site/
+          cp -r site/. _site/
+          find _site -maxdepth 2 -type d -o -type f -name '*.html' | sort
+
+      # PROXY_URL is filled in at deploy time from a repository variable, so
+      # pointing the app at a server is a settings change rather than a code
+      # change. Empty (unset) leaves the app exactly as it is without one.
+      - name: Point the app at the translation server
+        run: |
+          if [ -n "${{ vars.PROXY_URL }}" ]; then
+            sed -i "s|export const PROXY_URL = '';|export const PROXY_URL = '${{ vars.PROXY_URL }}';|" _site/js/translate.js
+            grep -n "PROXY_URL =" _site/js/translate.js
+          else
+            echo "PROXY_URL 변수가 비어 있습니다 — 번역 서버 없이 배포합니다."
+          fi
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: app
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4

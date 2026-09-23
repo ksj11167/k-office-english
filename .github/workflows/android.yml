@@ -30,6 +30,18 @@ jobs:
 
       - run: npm ci
       - run: npm test
+      # PROXY_URL is filled in at deploy time from a repository variable, so
+      # pointing the app at a server is a settings change rather than a code
+      # change. Empty (unset) leaves the app exactly as it is without one.
+      - name: Point the app at the translation server
+        run: |
+          if [ -n "${{ vars.PROXY_URL }}" ]; then
+            sed -i "s|export const PROXY_URL = '';|export const PROXY_URL = '${{ vars.PROXY_URL }}';|" app/js/translate.js
+            grep -n "PROXY_URL =" app/js/translate.js
+          else
+            echo "PROXY_URL 변수가 비어 있습니다 — 번역 서버 없이 배포합니다."
+          fi
+
       - run: npx cap sync android
 
       - name: Assemble debug APK
@@ -38,6 +50,6 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: real-talk-english-debug-apk
+          name: k-office-english-debug-apk
           path: android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error

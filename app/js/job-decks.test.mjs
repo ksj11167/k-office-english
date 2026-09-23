@@ -17,9 +17,10 @@ test('every deck has an id, a name, a blurb and cards', () => {
   }
 });
 
-test('every deck carries the v1 minimum of 40 cards', () => {
-  // PRD §4: twelve cards a job runs out in two days. Forty is the floor for
-  // shipping, and a floor nobody checks is a floor that quietly sinks.
+test('every deck carries the 40 cards the milestone counts on', () => {
+  // The decks are off-screen for v1 and waiting on a milestone, which is
+  // exactly when content rots unwatched. Forty a job is what the PRD's
+  // milestone table claims is ready; this is what makes that claim true.
   for (const d of JOB_DECKS) {
     assert.ok(d.cards.length >= 40, `deck ${d.id} has ${d.cards.length} cards, needs 40`);
   }

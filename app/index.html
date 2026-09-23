@@ -19,48 +19,33 @@
 
 <div id="app">
 
-  <!-- ══════ WELCOME — first run only ══════ -->
-  <section class="screen" id="s-welcome">
-    <div class="masthead">
-      <div class="wordmark"><i class="dot"></i><span>K-직장인 영어</span></div>
-      <h1>어떤 일 하세요?</h1>
-      <p class="small">고르시면 그 일에서 매일 쓰는 표현 <b>40장</b>이 바로 준비됩니다. 준비물도, 가입도 없습니다. 다른 직무는 나중에 언제든 볼 수 있어요.</p>
-    </div>
-
-    <div class="stack" style="min-height:0">
-      <div class="days" id="welcome-jobs"></div>
-      <button class="btn ghost wide" id="welcome-skip">직무 말고 내 카톡 대화로 시작할래요</button>
-    </div>
-  </section>
-
   <!-- ══════ HOME ══════ -->
   <section class="screen on" id="s-home">
     <div class="masthead">
       <div class="wordmark"><i class="dot"></i><span>K-직장인 영어</span></div>
-      <h1>회사에서 맨날 쓰는 그 말,<br>영어로는 뭐라고 하지?</h1>
-      <p class="small">“확인하고 말씀드릴게요”, “조금 늦어질 것 같아요” — 교재에 안 나오는데 매일 쓰는 말들. <b>하루 5분</b>, 아는 건 오른쪽 모르는 건 왼쪽으로 넘기면 됩니다.</p>
+      <h1>어제 단톡방을<br>영어로 읽고, 말해보기</h1>
+      <p class="small">카톡 대화를 통째로 영어로 옮깁니다. 그 중 <b>내가 한 말</b>만 골라 카드로 연습합니다 — 교재 문장이 아니라 내가 진짜 쓴 말로.</p>
     </div>
 
     <div class="stack" style="min-height:0">
+      <button class="btn wide" id="go-import">내 카톡 대화 가져오기</button>
       <button class="btn wide" id="go-resume">이어서 하기</button>
-      <div class="days" id="job-list"></div>
-      <button class="btn ghost wide" id="go-import">내 카톡 대화로 만들기</button>
+      <button class="btn ghost wide" id="home-sample">샘플로 먼저 구경하기</button>
       <button class="btn ghost wide" id="go-settings">설정</button>
+      <div class="note warn hide" id="home-note"><b>이 링크에는 번역 서버가 연결돼 있지 않습니다.</b> 샘플 대화로는 전 과정이 그대로 돌아가고, 내 카톡을 넣으려면 설정에 본인 Anthropic API 키를 넣어야 합니다.</div>
+      <div class="note"><b>대화는 이 기기 안에서 읽습니다.</b> 파일은 어디에도 업로드되지 않고, 영어로 옮기는 동안 그 날 대화만 전송됩니다.</div>
     </div>
   </section>
 
   <!-- ══════ IMPORT ══════ -->
   <section class="screen" id="s-import">
     <div class="topbar">
-      <button class="iconbtn" id="back-home" aria-label="뒤로">
-        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-      <h2>내 카톡으로 만들기</h2>
+      <button class="iconbtn" id="back-home" aria-label="뒤로"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <h2>카톡 대화 가져오기</h2>
     </div>
 
     <div class="stack">
       <div class="panel">
-        <p class="small">진짜 내 말로 하고 싶으면 — 어제 단톡방 대화가 그대로 카드가 됩니다.</p>
         <dl class="howto">
           <dt>1</dt><dd>카톡 대화방 → 메뉴(≡) → <b>대화 내용 내보내기</b> → 텍스트만</dd>
           <dt>2</dt><dd>나온 <b>.txt</b>를 고르거나 내용을 붙여넣기</dd>
@@ -73,31 +58,22 @@
         <textarea id="paste" placeholder="또는 여기에 대화 내용을 붙여넣으세요"></textarea>
         <button class="btn wide" id="go-parse" disabled>읽어들이기</button>
         <p class="small" id="import-err" role="status"></p>
-        <button class="btn ghost wide" id="go-sample">먼저 샘플로 구경하기</button>
+        <button class="btn ghost wide" id="go-sample">샘플로 먼저 구경하기</button>
       </div>
-
-      <div class="note"><b>대화는 이 기기 안에서 읽습니다.</b> 파일은 어디에도 업로드되지 않습니다. 그날 연습할 문장과 앞뒤 맥락만 번역을 위해 전송됩니다.</div>
     </div>
   </section>
 
-  <!-- ══════ PREVIEW ══════ -->
+  <!-- ══════ PREVIEW — 파싱 확인 ══════ -->
   <section class="screen" id="s-preview">
     <div class="topbar">
-      <button class="iconbtn" id="back-preview" aria-label="뒤로">
-        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
+      <button class="iconbtn" id="back-preview" aria-label="뒤로"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
       <h2>이렇게 읽었습니다</h2>
     </div>
     <div class="stack" style="gap:18px">
       <div class="statline" id="stats"></div>
       <div class="panel">
-        <h2>어느 쪽이 나인가요?</h2>
-        <p class="small">고른 사람의 발화만 카드가 됩니다. 나머지는 맥락으로 쓰여요.</p>
-        <div class="pickers" id="pickers"></div>
-      </div>
-      <div class="panel">
         <h2>대화 미리보기</h2>
-        <p class="small">파싱이 어긋난 곳은 없는지 훑어보세요.</p>
+        <p class="small">파싱이 어긋난 곳은 없는지 훑어보세요. 어긋난 채로 영어로 옮기면 그대로 어긋납니다.</p>
         <div class="transcript" id="preview-tx"></div>
       </div>
       <button class="btn wide" id="go-days">날짜별로 나누기</button>
@@ -108,15 +84,13 @@
   <!-- ══════ DAYS ══════ -->
   <section class="screen" id="s-days">
     <div class="topbar">
-      <button class="iconbtn" id="back-days" aria-label="뒤로">
-        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
+      <button class="iconbtn" id="back-days" aria-label="뒤로"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
       <h2>어느 날을 할까요?</h2>
     </div>
     <div class="stack" style="gap:16px; min-height:0">
       <p class="small" id="days-sub"></p>
       <div class="days" id="day-list"></div>
-      <div class="note">하루치는 보통 <b>5~30장</b>입니다. 오늘은 하루만, 더 하고 싶으면 다음 날짜를 이어서.</div>
+      <div class="note">하루치씩 영어로 옮깁니다. 오늘은 하루만, 더 하고 싶으면 다음 날짜를 이어서.</div>
     </div>
   </section>
 
@@ -125,11 +99,25 @@
     <div class="center">
       <div class="spin" id="build-spin"></div>
       <h2 id="build-title">영어로 옮기는 중</h2>
-      <p class="small" id="build-sub">앞뒤 대화를 함께 읽어서 “그거”가 뭘 가리키는지까지 반영합니다.</p>
+      <p class="small" id="build-sub">대화 전체를 함께 읽어서 “그거”가 뭘 가리키는지까지 반영합니다.</p>
       <div class="rail thin" style="max-width:260px"><i id="build-bar"></i></div>
       <p class="small" id="build-count"></p>
       <button class="btn ghost hide" id="build-retry">다시 시도</button>
       <button class="btn ghost hide" id="build-back">돌아가기</button>
+    </div>
+  </section>
+
+  <!-- ══════ TRANSCRIPT — 영어로 옮겨진 대화 ══════ -->
+  <section class="screen" id="s-transcript">
+    <div class="topbar">
+      <button class="iconbtn" id="back-transcript" aria-label="뒤로"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <h2 id="tx-title">영어 대화록</h2>
+    </div>
+    <div class="stack" style="gap:16px; min-height:0">
+      <p class="small" id="tx-sub"></p>
+      <div class="panel" id="tx-pick"></div>
+      <div class="transcript tall" id="tx-body"></div>
+      <button class="btn wide" id="go-practice">연습 시작</button>
     </div>
   </section>
 
@@ -168,8 +156,8 @@
       <p class="small" id="done-sub"></p>
       <div class="stack" style="width:100%;max-width:310px">
         <button class="btn wide hide" id="next-day">다음 날짜 이어서 하기</button>
-        <button class="btn ghost wide" id="more-jobs">다른 직무 표현 보기</button>
-        <button class="btn ghost wide" id="pick-day">내 덱 목록</button>
+        <button class="btn ghost wide" id="see-transcript">이 날 영어 대화록 다시 보기</button>
+        <button class="btn ghost wide" id="pick-day">날짜 목록</button>
         <button class="btn ghost wide" id="restart">다른 대화 넣기</button>
       </div>
     </div>
@@ -178,9 +166,7 @@
   <!-- ══════ SETTINGS ══════ -->
   <section class="screen" id="s-settings">
     <div class="topbar">
-      <button class="iconbtn" id="back-settings" aria-label="뒤로">
-        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
+      <button class="iconbtn" id="back-settings" aria-label="뒤로"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
       <h2>설정</h2>
     </div>
     <div class="stack">
@@ -201,7 +187,12 @@
       <div class="panel">
         <h2>저장된 데이터</h2>
         <p class="small" id="data-state"></p>
-        <button class="btn ghost wide" id="wipe">카드와 진도 모두 지우기</button>
+        <button class="btn ghost wide" id="wipe">대화와 진도 모두 지우기</button>
+      </div>
+      <div class="panel">
+        <h2>개인정보</h2>
+        <p class="small">대화는 기기 안에서 읽고, 영어로 옮기는 순간에만 전송됩니다. 서버에 저장하지 않습니다.</p>
+        <a class="btn ghost wide" href="privacy.html">개인정보 처리방침</a>
       </div>
     </div>
   </section>

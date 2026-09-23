@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">K-직장인 영어</string>
     <string name="title_activity_main">K-직장인 영어</string>
-    <string name="package_name">com.ksj11167.realtalkenglish</string>
-    <string name="custom_url_scheme">com.ksj11167.realtalkenglish</string>
+    <string name="package_name">com.ksj11167.kofficeenglish</string>
+    <string name="custom_url_scheme">com.ksj11167.kofficeenglish</string>
 </resources>

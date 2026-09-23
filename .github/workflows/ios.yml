@@ -1,8 +1,14 @@
 name: Build iOS app
 
-# macOS runners are billed by the minute on private repositories, so this runs
-# only when asked for rather than on every push. It builds the simulator target,
-# which needs no signing certificate — enough to prove the shell compiles.
+# Since the repository went public, standard runners — macOS included — are free
+# and unmetered, so the old reason for keeping this on workflow_dispatch (paying
+# by the minute) is gone. It stays manual only because nothing about iOS changes
+# on a normal push.
+#
+# This builds the simulator target, which needs no signing certificate. That
+# proves the shell compiles; it does not produce anything installable. Shipping
+# to TestFlight from here is possible without owning a Mac — App Store Connect
+# API key plus fastlane — and needs the $99 Apple Developer account first.
 on:
   workflow_dispatch:
 

@@ -1,0 +1,20 @@
+name = "koe-translate"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+
+[vars]
+# Where the app is served from. The proxy answers nobody else, so a copy of the
+# page on someone else's domain cannot spend this key.
+ALLOWED_ORIGINS = "https://ksj11167.github.io"
+# Free translations per caller per day. A day of chat is one or two calls.
+DAILY_LIMIT = "20"
+MODEL = "claude-opus-5"
+
+# npx wrangler kv namespace create QUOTA  →  paste the id here
+[[kv_namespaces]]
+binding = "QUOTA"
+id = "REPLACE_ME"
+
+# Secrets are never written in this file:
+#   npx wrangler secret put ANTHROPIC_API_KEY
+#   npx wrangler secret put QUOTA_SALT

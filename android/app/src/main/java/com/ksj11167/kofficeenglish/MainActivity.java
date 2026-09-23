@@ -1,4 +1,4 @@
-package com.ksj11167.realtalkenglish;
+package com.ksj11167.kofficeenglish;
 
 import com.getcapacitor.BridgeActivity;
 

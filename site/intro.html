@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>K-직장인 영어 — 어제 단톡방을 영어로</title>
+<meta name="description" content="카톡 대화를 통째로 영어로 옮기고, 그 중 내가 한 말만 골라 말하기 연습. 교재 문장이 아니라 내가 진짜 쓴 말로.">
+<meta property="og:title" content="K-직장인 영어">
+<meta property="og:description" content="어제 단톡방이 영어 대화록이 됩니다. 그 중 내가 한 말만 골라 말하기 연습.">
+<meta property="og:type" content="website">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* Page, not app: the app's #app is a 480px phone column, this is a document. */
+  body { overscroll-behavior-y: auto; }
+  .page { max-width: 1040px; margin: 0 auto; padding: 0 20px 80px; }
+
+  .nav {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; padding-block: 22px; flex-wrap: wrap;
+  }
+  .nav .wordmark span { font-size: 12.5px; letter-spacing: .1em; }
+
+  .hero { padding-block: 26px 44px; display: grid; gap: 34px; align-items: center; }
+  @media (min-width: 900px) { .hero { grid-template-columns: 1fr 300px; gap: 56px; } }
+  .hero h1 { font-size: clamp(30px, 6vw, 46px); line-height: 1.16; letter-spacing: -.025em; }
+  .hero .lede { font-size: clamp(16px, 2.4vw, 19px); line-height: 1.6; color: var(--ink-2); margin-top: 16px; max-width: 46ch; }
+  .cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+  .cta .btn { text-decoration: none; }
+
+  /* phone frame */
+  .phone {
+    position: relative; margin: 0 auto;
+    width: 100%; max-width: 290px; aspect-ratio: 1290 / 2796;
+    border-radius: 42px; padding: 11px;
+    background: linear-gradient(160deg, #2a2f3a, #11141b);
+    box-shadow: 0 26px 60px rgba(15, 20, 30, .28), 0 2px 0 rgba(255,255,255,.14) inset;
+  }
+  .phone img {
+    width: 100%; height: 100%; object-fit: cover;
+    border-radius: 32px; display: block; background: var(--ground);
+  }
+
+  .steps { display: grid; gap: 30px; padding-block: 18px; }
+  @media (min-width: 760px) { .steps { grid-template-columns: repeat(3, 1fr); gap: 26px; } }
+  .step { display: flex; flex-direction: column; gap: 16px; }
+  .step .phone { max-width: 250px; }
+  .step .cap { text-align: center; }
+  .step .cap b { display: block; font-size: 16px; letter-spacing: -.01em; margin-bottom: 5px; }
+  .step .cap span { font-size: 13.5px; color: var(--muted); line-height: 1.55; }
+  .step .num {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .16em;
+    color: var(--accent); display: block; margin-bottom: 8px;
+  }
+
+  section { padding-block: 44px; border-top: 1px solid var(--line); }
+  section > h2 { font-size: clamp(21px, 3.4vw, 27px); letter-spacing: -.02em; margin-bottom: 10px; }
+  section > p.sub { color: var(--ink-2); max-width: 56ch; line-height: 1.6; }
+
+  .grid2 { display: grid; gap: 18px; margin-top: 26px; }
+  @media (min-width: 720px) { .grid2 { grid-template-columns: 1fr 1fr; } }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 22px; }
+  .card h3 { margin: 0 0 8px; font-size: 16.5px; letter-spacing: -.01em; }
+  .card p { font-size: 14px; line-height: 1.6; color: var(--ink-2); }
+
+  .facts { width: 100%; border-collapse: collapse; margin-top: 22px; font-size: 14.5px; }
+  .facts th, .facts td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .facts th { width: 40%; font-weight: 600; color: var(--ink); }
+  .facts td { color: var(--ink-2); }
+
+  footer { padding-block: 34px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; line-height: 1.7; }
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <nav class="nav">
+    <div class="wordmark"><i class="dot"></i><span>K-직장인 영어</span></div>
+    <a class="btn ghost" href="./" style="min-height:44px">바로 써보기</a>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <h1>어제 단톡방을<br>영어로 읽고, 말해보기</h1>
+      <p class="lede">
+        “확인하고 말씀드릴게요”, “조금 늦어질 것 같아요”, “넵”.
+        교재엔 없는데 회사에서 매일 쓰는 말입니다.
+        카톡 대화를 <b>통째로 영어로</b> 옮기고, 그 중 <b>내가 한 말만</b> 골라
+        입으로 말하는 연습을 합니다.
+      </p>
+      <div class="cta">
+        <a class="btn" href="./">샘플로 30초 만에 보기</a>
+        <a class="btn ghost" href="privacy.html">개인정보 처리방침</a>
+      </div>
+    </div>
+    <div class="phone">
+      <img src="shots/4-transcript.png" alt="영어로 옮겨진 카톡 대화 화면. 각 말풍선에 영어가 크게, 원래 한국어가 그 아래 작게 표시된다." loading="eager" width="1290" height="2796">
+    </div>
+  </header>
+
+  <section>
+    <h2>어떻게 되나</h2>
+    <p class="sub">카톡의 «대화 내용 내보내기»로 받은 .txt 하나면 됩니다. 앱이 날짜별로 나눠서 하루치씩 처리합니다.</p>
+    <div class="steps" style="margin-top:30px">
+      <div class="step">
+        <div class="phone"><img src="shots/3-days.png" alt="날짜 목록 화면" loading="lazy" width="1290" height="2796"></div>
+        <div class="cap">
+          <span class="num">01</span>
+          <b>하루씩 끊어서</b>
+          <span>6개월치를 한 번에 처리하면 카드가 수천 장이 되어 아무도 끝내지 못합니다. 하루면 보통 5~30장입니다.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="phone"><img src="shots/4-transcript.png" alt="영어 대화록 화면" loading="lazy" width="1290" height="2796"></div>
+        <div class="cap">
+          <span class="num">02</span>
+          <b>대화 전체가 영어로</b>
+          <span>상대방 말까지 전부 옮깁니다. 그래야 “그거”가 뭘 가리키는지 살아 있고, 원래 한국어는 아래에 그대로 남습니다.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="phone"><img src="shots/5-card.png" alt="말하기 카드 화면" loading="lazy" width="1290" height="2796"></div>
+        <div class="cap">
+          <span class="num">03</span>
+          <b>내 차례만 비어 있는 대화</b>
+          <span>앞뒤 맥락은 영어로 남고 내 말만 한국어로 남습니다. 그 자리를 소리 내어 채우면 됩니다.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>왜 내가 쓴 말인가</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3>번역기는 남지 않습니다</h3>
+        <p>그때그때 해결되지만 같은 문장을 매번 다시 찾습니다. 여기서는 내가 실제로 친 말이 카드가 되어 남고, 틀린 것부터 다시 돌아옵니다.</p>
+      </div>
+      <div class="card">
+        <h3>교재는 내 상황이 아닙니다</h3>
+        <p>“사과를 먹습니다”는 회사에서 쓸 일이 없습니다. 어제 단톡방에 친 말은 내일도 씁니다.</p>
+      </div>
+      <div class="card">
+        <h3>아는 건 오른쪽, 막힌 건 왼쪽</h3>
+        <p>손가락 한 번으로 채점합니다. 왼쪽으로 넘긴 문장은 FSRS 간격 반복 스케줄러가 더 자주 데려옵니다.</p>
+      </div>
+      <div class="card">
+        <h3>말해보고 채점받기</h3>
+        <p>마이크를 누르고 영어로 말하면 얼마나 맞았는지, 어떤 단어가 빠졌는지 알려줍니다. 재인이 아니라 인출 연습입니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>대화는 어디로 가나</h2>
+    <p class="sub">남의 회사 단톡방이 지나가는 앱이라, 이 부분은 구체적으로 적습니다.</p>
+    <table class="facts">
+      <tr><th>파일 업로드</th><td>없습니다. .txt는 기기 안에서 읽고 어디에도 올리지 않습니다</td></tr>
+      <tr><th>서버 저장</th><td>없습니다. 영어로 옮기는 그 순간에만 해당 날짜 대화가 전송되고, 저장되지 않습니다</td></tr>
+      <tr><th>회원가입</th><td>없습니다. 계정도 이메일도 받지 않습니다</td></tr>
+      <tr><th>광고 · 분석 도구</th><td>넣지 않았습니다</td></tr>
+      <tr><th>다른 사용자와 공유</th><td>공유 기능 자체가 없습니다. 대화는 본인 기기에만 남습니다</td></tr>
+    </table>
+    <p style="margin-top:18px"><a href="privacy.html">개인정보 처리방침 전문 →</a></p>
+  </section>
+
+  <section>
+    <h2>지금 상태</h2>
+    <div class="note warn" style="margin-top:6px">
+      <b>이 링크는 아직 번역 서버가 붙어 있지 않습니다.</b>
+      <b>샘플 대화</b>로는 읽기 · 영어 변환 · 스와이프 · 말하기 채점까지 전 과정이 그대로 돌아갑니다.
+      <b>본인 카톡</b>을 넣으려면 설정에서 Anthropic API 키를 넣어야 하고, 곧 서버가 붙으면 그것도 필요 없어집니다.
+    </div>
+    <div class="cta">
+      <a class="btn" href="./">샘플로 써보기</a>
+      <a class="btn ghost" href="https://github.com/ksj11167/k-office-english">소스 보기</a>
+    </div>
+  </section>
+
+  <footer>
+    <p>
+      만드는 중인 앱입니다 — 써보시고 이상한 점이 있으면 알려주세요.
+      문의 <a href="mailto:ksj11167@gmail.com">ksj11167@gmail.com</a> ·
+      <a href="https://github.com/ksj11167/k-office-english">GitHub</a>
+    </p>
+    <p style="margin-top:10px">
+      카카오 및 카카오톡과 무관합니다. 카카오톡이 사용자에게 제공하는 «대화 내용 내보내기» 파일을
+      사용자가 직접 불러오는 방식이며, 카카오 API를 사용하지 않습니다.
+    </p>
+  </footer>
+
+</div>
+</body>
+</html>

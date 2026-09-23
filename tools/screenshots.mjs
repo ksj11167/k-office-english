@@ -1,90 +1,108 @@
 /**
- * Drive the real app in a browser and save store screenshots.
+ * Store screenshots, taken from the running app.
  *
- * Both stores want images at exact pixel sizes, and both reject a mockup that
- * is not the app. So this walks the actual screens — first run, a card front,
- * a card back, the finish screen, the KakaoTalk preview — at a viewport whose
- * CSS size times the scale factor lands on the size the store asks for.
+ * Both stores want phone-sized images and both reject mock-ups that do not match
+ * what ships. Driving the real app means these cannot drift from it: if a screen
+ * is renamed or a button moves, this fails instead of quietly shipping a picture
+ * of an app that no longer exists.
  *
- *   npx http-server app -p 8787 &
- *   node tools/screenshots.mjs [outDir] [--url http://127.0.0.1:8787]
+ * Runs on the sample conversation, so no key and no network.
  *
- * Playwright is not a dependency of the app — install it where you run this
- * (`npm i playwright`), or point CHROME_PATH at a Chromium you already have.
+ *   node tools/screenshots.mjs [outDir]
  */
-import { mkdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { chromium } from 'playwright';
+import { createServer } from 'node:http';
+import { readFile, mkdir, copyFile } from 'node:fs/promises';
+import { extname, join, normalize } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const args = process.argv.slice(2);
-const flag = (name, fallback) => {
-  const i = args.indexOf('--' + name);
-  return i >= 0 ? args[i + 1] : fallback;
-};
-const outRoot = args.find((a) => !a.startsWith('--') && args[args.indexOf(a) - 1] !== '--url') || 'store';
-const base = flag('url', 'http://127.0.0.1:8787');
+const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..', 'app');
+const OUT = process.argv[2] || join(fileURLToPath(new URL('.', import.meta.url)), '..', 'store', 'screenshots');
 
-let chromium;
-try {
-  ({ chromium } = await import('playwright'));
-} catch {
-  console.error('playwright is not installed here — run `npm i playwright` first');
-  process.exit(1);
-}
-
-/* CSS size × scale = the pixel size each store asks for. */
-const TARGETS = [
-  { name: 'ios-6.7', viewport: { width: 430, height: 932 }, scale: 3 },   // 1290×2796
-  { name: 'android-phone', viewport: { width: 360, height: 640 }, scale: 3 }, // 1080×1920
+/* 6.7" iPhone and a common Android phone, the two sizes the stores ask for. */
+const SIZES = [
+  { name: 'ios-6.7', width: 430, height: 932, scale: 3 },    // 1290 × 2796
+  { name: 'android', width: 360, height: 640, scale: 3 },    // 1080 × 1920
 ];
 
-const launch = { ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {}) };
-const browser = await chromium.launch(launch);
+const TYPES = {
+  '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript',
+  '.css': 'text/css', '.json': 'application/json',
+  '.webmanifest': 'application/manifest+json', '.png': 'image/png',
+};
 
-for (const t of TARGETS) {
-  const dir = join(outRoot, t.name);
-  mkdirSync(dir, { recursive: true });
+function serve() {
+  const server = createServer(async (req, res) => {
+    const path = decodeURIComponent(req.url.split('?')[0]);
+    const rel = normalize(path === '/' ? '/index.html' : path).replace(/^(\.\.[/\\])+/, '');
+    try {
+      const buf = await readFile(join(ROOT, rel));
+      res.writeHead(200, { 'content-type': TYPES[extname(rel)] || 'application/octet-stream' });
+      res.end(buf);
+    } catch { res.writeHead(404).end('not found'); }
+  });
+  return new Promise((ok) => server.listen(0, '127.0.0.1', () => ok(server)));
+}
 
-  const ctx = await browser.newContext({ viewport: t.viewport, deviceScaleFactor: t.scale, locale: 'ko-KR' });
+const server = await serve();
+const base = `http://127.0.0.1:${server.address().port}/`;
+const browser = await chromium.launch();
+await mkdir(OUT, { recursive: true });
+
+for (const size of SIZES) {
+  const ctx = await browser.newContext({
+    viewport: { width: size.width, height: size.height },
+    deviceScaleFactor: size.scale,
+    colorScheme: 'light',
+  });
   const page = await ctx.newPage();
-  const shot = async (n, name) => {
-    await page.screenshot({ path: join(dir, `${n}-${name}.png`) });
-    console.log(`${t.name}/${n}-${name}.png`);
-  };
-  const settle = () => page.waitForTimeout(450);
+  // Fonts come from a CDN; without them the shots render in fallback faces and
+  // look nothing like the app, so let these through and wait for them.
+  await page.goto(base);
+  await page.waitForSelector('#s-home.on');
+  await page.evaluate(() => document.fonts.ready);
 
-  await page.goto(base + '/index.html', { waitUntil: 'load' });
-  await settle();
-  await shot(1, 'welcome');
+  const shot = (n, name) => page.screenshot({ path: join(OUT, `${size.name}-${n}-${name}.png`) });
 
-  // Pick a job — that is the whole of onboarding, and it opens the deck.
-  await page.locator('#welcome-jobs .day[data-job="dev"]').click();
-  await settle();
-  await shot(2, 'card-front');
+  await shot(1, 'home');
 
-  await page.locator('#deck .swipe-card.front .flip').click();
-  await settle();
-  await shot(3, 'card-back');
+  await page.click('#home-sample');
+  await page.waitForSelector('#s-preview.on');
+  await shot(2, 'read-check');
 
-  // Mark a few known so the finish screen has something to report.
-  for (let i = 0; i < 4; i++) {
-    await page.locator('#sw-yes').click();
-    await page.waitForTimeout(320);
-  }
-  await page.locator('#quit').click();
-  await settle();
-  await shot(4, 'done');
+  await page.click('#go-days');
+  await page.waitForSelector('#s-days.on');
+  await shot(3, 'days');
 
-  await page.locator('#more-jobs').click();
-  await settle();
-  await shot(5, 'home');
+  await page.click('#day-list .day >> nth=1');
+  await page.waitForSelector('#s-transcript.on', { timeout: 15000 });
+  await page.click('#tx-pick input[value="김세진"]');
+  await page.waitForFunction(() => !document.getElementById('go-practice').disabled);
+  await shot(4, 'transcript');
 
-  await page.locator('#go-import').click();
-  await settle();
-  await page.locator('#go-sample').click();
-  await page.waitForTimeout(700);
-  await shot(6, 'kakao-preview');
+  await page.click('#go-practice');
+  await page.waitForSelector('#s-practice.on');
+  await page.waitForTimeout(400);
+  await shot(5, 'card');
+
+  await page.click('.swipe-card.front .flip');
+  await page.waitForTimeout(250);
+  await shot(6, 'answer');
 
   await ctx.close();
+  console.log(`  ${size.name}: 6 shots at ${size.width * size.scale}×${size.height * size.scale}`);
 }
 
 await browser.close();
+server.close();
+console.log(`\nwrote ${SIZES.length * 6} screenshots to ${OUT}`);
+
+/* The landing page shows the same shots. Refreshing them here rather than by
+   hand is the whole reason they cannot drift from the app. */
+if (!process.argv[2]) {
+  const SITE = join(fileURLToPath(new URL('.', import.meta.url)), '..', 'site', 'shots');
+  await mkdir(SITE, { recursive: true });
+  const used = ['1-home', '3-days', '4-transcript', '5-card', '6-answer'];
+  for (const n of used) await copyFile(join(OUT, `ios-6.7-${n}.png`), join(SITE, `${n}.png`));
+  console.log(`refreshed ${used.length} shots in site/shots for the landing page`);
+}
