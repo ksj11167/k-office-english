@@ -1,0 +1,135 @@
+name: Build release bundle
+
+# Play accepts one thing: a signed Android App Bundle. The debug APK that
+# android.yml builds on every push installs fine over a cable and is refused by
+# the console, so this is the workflow that actually produces something
+# uploadable.
+#
+# Manual only. A release is something you decide to cut, not something a push
+# decides for you — and the signing key should be touched as rarely as possible.
+on:
+  workflow_dispatch:
+    inputs:
+      throwaway_key:
+        description: '시크릿 없이 빌드 경로만 확인 (나오는 AAB는 업로드 불가)'
+        type: boolean
+        default: false
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+        with:
+          # Same pin as android.yml: the action's default list still asks for
+          # "tools", which Google removed, and sdkmanager exits 1 on the miss.
+          packages: 'platform-tools platforms;android-36 build-tools;36.0.0'
+
+      # Unlike the proxy's deploy, a missing setting here is always an error:
+      # nobody runs this by accident, so being asked for a release without a key
+      # means the key is missing, not that the step has not been reached yet.
+      - name: Check the signing settings are filled in
+        if: ${{ !inputs.throwaway_key }}
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          missing=""
+          [ -n "$KEYSTORE" ]   || missing="$missing ANDROID_KEYSTORE_BASE64"
+          [ -n "$STORE_PASS" ] || missing="$missing ANDROID_KEYSTORE_PASSWORD"
+          [ -n "$ALIAS" ]      || missing="$missing ANDROID_KEY_ALIAS"
+          [ -n "$KEY_PASS" ]   || missing="$missing ANDROID_KEY_PASSWORD"
+          if [ -n "$missing" ]; then
+            echo "::error::서명 시크릿이 비어 있습니다:$missing — store/signing.md 참조. 키 없이 빌드 경로만 보려면 throwaway_key 를 켜고 다시 실행하세요."
+            exit 1
+          fi
+          echo "서명 시크릿 4개 전부 채워져 있습니다."
+
+      # The key only ever exists as a file inside one runner, written from the
+      # secret and deleted at the end. Nothing is echoed: a log line is a
+      # permanent copy.
+      - name: Write the keystore
+        if: ${{ !inputs.throwaway_key }}
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          printf '%s' "$KEYSTORE" | base64 -d > "$RUNNER_TEMP/upload.jks"
+          echo "keystore 크기: $(stat -c%s "$RUNNER_TEMP/upload.jks") 바이트"
+
+      # A key generated here and thrown away proves the gradle wiring and the
+      # bundle task work before anyone creates a real one. The bundle it signs
+      # is deliberately useless — Play ties an app to the first key it sees.
+      - name: Generate a throwaway key
+        if: ${{ inputs.throwaway_key }}
+        run: |
+          keytool -genkeypair -v \
+            -keystore "$RUNNER_TEMP/upload.jks" \
+            -storetype JKS -keyalg RSA -keysize 2048 -validity 1 \
+            -alias throwaway -storepass throwaway -keypass throwaway \
+            -dname "CN=throwaway, OU=ci, O=ci, L=, S=, C=KR"
+          echo "::warning::버려지는 키로 서명했습니다. 이 AAB 는 Play 에 올리면 안 됩니다."
+
+      - run: npm ci
+      - run: npm test
+
+      # Same injection android.yml and pages.yml do: the server address is a
+      # repository variable, so a release build points at it without a code
+      # change. Empty means the shipped app has no translation server.
+      - name: Point the app at the translation server
+        run: |
+          if [ -n "${{ vars.PROXY_URL }}" ]; then
+            sed -i "s|export const PROXY_URL = '';|export const PROXY_URL = '${{ vars.PROXY_URL }}';|" app/js/translate.js
+            grep -n "PROXY_URL =" app/js/translate.js
+          else
+            echo "::warning::PROXY_URL 변수가 비어 있습니다 — 번역 서버 없는 빌드가 나갑니다. 테스터에게 주기 전에 채우세요."
+          fi
+
+      - run: npx cap sync android
+
+      - name: Assemble the signed bundle
+        working-directory: android
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/upload.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ inputs.throwaway_key && 'throwaway' || secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ inputs.throwaway_key && 'throwaway' || secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ inputs.throwaway_key && 'throwaway' || secrets.ANDROID_KEY_PASSWORD }}
+        run: ./gradlew bundleRelease --no-daemon
+
+      # A bundle carries a JAR signature, so reading it is keytool's job rather
+      # than apksigner's. The check that matters is which key signed it: the
+      # gradle fallback silently uses the debug key, and a debug-signed bundle
+      # looks fine here and is refused after the upload, not before.
+      - name: Check which key signed it
+        run: |
+          aab=$(ls android/app/build/outputs/bundle/release/*.aab)
+          out=$(keytool -printcert -jarfile "$aab")
+          echo "$out"
+          if echo "$out" | grep -q 'Android Debug'; then
+            echo "::error::디버그 키로 서명됐습니다 — 서명 설정이 적용되지 않았습니다. Play 는 이 번들을 받지 않습니다."
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: k-office-english-release-aab
+          path: android/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+
+      - name: Shred the keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/upload.jks"
+
+      - name: What to do next
+        if: ${{ !inputs.throwaway_key }}
+        run: |
+          echo "AAB 를 내려받아 Play Console → 테스트 → 비공개 테스트 에 올리세요."
+          echo "다음 업로드부터는 android/app/build.gradle 의 versionCode 를 올려야 합니다 — 같은 값은 거부됩니다."

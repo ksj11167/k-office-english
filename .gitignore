@@ -12,6 +12,13 @@ ios/App/App/public/
 ios/App/App/capacitor.config.json
 ios/App/Podfile.lock
 
+# Signing keys. The upload key never belongs in the repository — it reaches a
+# build through repository secrets, and a copy committed by accident is a copy
+# that has to be rotated with Google.
+*.jks
+*.keystore
+android/keystore.properties
+
 # native build output
 android/.gradle/
 android/build/
