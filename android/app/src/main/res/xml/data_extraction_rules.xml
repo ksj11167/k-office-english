@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 12+ reads this for both cloud backup and device-to-device transfer.
+  Everything the app stores lives in the WebView's own storage — the imported
+  conversation, its translations, the review schedule and, where someone set
+  one, their API key. The privacy policy says that data does not leave the
+  device, so none of it may ride a backup to Drive or a transfer to a new
+  phone. Excluding each domain is how that promise is actually kept.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" />
+        <exclude domain="file" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="external" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" />
+        <exclude domain="file" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="external" />
+    </device-transfer>
+</data-extraction-rules>

@@ -2,7 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
-        android:allowBackup="true"
+        <!-- The policy promises the conversation never leaves the device, and
+             auto-backup would quietly carry the WebView's storage — cards, the
+             imported chat and any API key — to the user's Drive and onto their
+             next phone. Off, so the promise is literally true. The cost is that
+             a new phone starts empty, which the app already tells people. -->
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
