@@ -2,7 +2,8 @@
 
 제출 폼에 그대로 옮겨 붙이는 문구다. 스크린샷은 `store/screenshots/`에 있고
 `node tools/screenshots.mjs`로 다시 뽑는다 — 실제 앱을 돌려서 찍으므로 화면이
-바뀌면 그림도 같이 바뀐다.
+바뀌면 그림도 같이 바뀐다. 피처 그래픽은 `store/feature-graphic.png`(1024×500,
+알파 없음)이고 `node tools/feature-graphic.mjs`로 다시 뽑는다.
 
 ---
 
