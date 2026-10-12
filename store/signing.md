@@ -65,6 +65,8 @@ GitHub 시크릿에는 파일을 못 넣으니 base64 문자열로 바꿔 넣는
 
 **Actions → Build release bundle → Run workflow**
 
+`version_code`는 첫 업로드면 `1` 그대로 두면 된다.
+
 끝나면 실행 화면 아래 **Artifacts**에 `k-office-english-release-aab`가 생긴다.
 내려받아 압축을 풀면 `app-release.aab`가 나온다.
 
@@ -91,12 +93,16 @@ Play Console → 테스트 → **비공개 테스트** 트랙. 내부 테스트�
 
 ## 다음 업로드부터
 
-`android/app/build.gradle`의 **`versionCode`를 올려야 한다.** 같은 숫자는 거부된다.
+**`version_code`를 더 큰 숫자로 넣고 실행한다.** Run workflow 창의 입력란이고,
+커밋할 필요가 없다. 같은 숫자는 Play가 거부한다.
 
-```gradle
-versionCode 2        // 1 → 2 → 3 …, 올리기만 하면 된다
-versionName "1.0.1"  // 사람이 읽는 쪽. 아무 때나 바꿔도 된다
 ```
+1 → 2 → 3 …   올리기만 하면 되고, 건너뛰어도 된다
+```
+
+사람이 읽는 `versionName`("1.0")은 `android/app/build.gradle`에 있고 아무 때나
+바꿔도 된다. 둘은 별개다 — 스토어에 보이는 건 `versionName`, Play가 중복을
+판단하는 건 `versionCode`다.
 
 ## 키를 잃어버렸다면
 

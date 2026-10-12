@@ -7,7 +7,11 @@ android {
         applicationId "com.ksj11167.kofficeenglish"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
+        // Play refuses an upload whose versionCode it has seen before, and the
+        // committed value is the one thing about a release that must change
+        // every single time. Reading it from the environment means the bump is
+        // a field in the release workflow, not a commit somebody forgets.
+        versionCode (System.getenv('ANDROID_VERSION_CODE') ?: '1').toInteger()
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
