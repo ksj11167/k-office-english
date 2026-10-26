@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- The policy promises the conversation never leaves the device, and
+         auto-backup would quietly carry the WebView's storage — cards, the
+         imported chat and any API key — to the user's Drive and onto their
+         next phone. Off, so the promise is literally true. The cost is that a
+         new phone starts empty, which the app already tells people.
+         (A comment cannot sit between attributes; XML rejects it.) -->
     <application
-        <!-- The policy promises the conversation never leaves the device, and
-             auto-backup would quietly carry the WebView's storage — cards, the
-             imported chat and any API key — to the user's Drive and onto their
-             next phone. Off, so the promise is literally true. The cost is that
-             a new phone starts empty, which the app already tells people. -->
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:icon="@mipmap/ic_launcher"
