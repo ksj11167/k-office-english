@@ -130,6 +130,13 @@ try {
     assert(text.includes('지금 QA 돌리고 있습니다'), 'the original Korean is gone');
   });
 
+  await step('the AI-written English can be reported from where it is shown', async () => {
+    const link = page.locator('#tx-report');
+    assert(await link.isVisible(), 'no way to flag a translation — Play asks for one');
+    const href = await link.getAttribute('href');
+    assert(href.startsWith('mailto:ksj11167@gmail.com'), 'report goes nowhere: ' + href);
+  });
+
   await step('practice is blocked until I say which speaker is me', async () => {
     assert(await page.locator('#go-practice').isDisabled(), 'practice offered before picking me');
     const label = await page.locator('#go-practice').innerText();

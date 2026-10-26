@@ -17,9 +17,33 @@ Play는 **서명된 번들(AAB)** 하나만 받는다. 푸시마다 CI가 만드
 
 ---
 
-## 1. 업로드 키 만들기
+## 1. 업로드 키 만들기 — 명령 한 줄
 
-본인 컴퓨터에서 한 번만 한다. Java가 깔려 있으면 `keytool`은 같이 들어 있다.
+**본인 컴퓨터**의 터미널(macOS: 터미널, Windows: Git Bash)에서:
+
+```bash
+curl -fsSLO https://raw.githubusercontent.com/ksj11167/k-office-english/main/tools/make-upload-key.sh
+bash make-upload-key.sh
+```
+
+저장소를 이미 받아 뒀다면 그 폴더에서 `bash tools/make-upload-key.sh` 한 줄이면 된다.
+
+스크립트가 하는 일:
+
+- 키를 저장소 **밖** `~/k-office-english-upload-key/upload.jks`에 만든다 (실수로 커밋될
+  수 없게)
+- 32자 비밀번호를 무작위로 만든다
+- 2번에 넣을 **시크릿 4개의 이름과 값**을 화면에 그대로 찍어 준다
+- 키가 이미 있으면 덮어쓰지 않고 멈춘다
+
+**`keytool`이 없다고 나오면** Java(JDK)를 먼저 깐다. macOS는 `brew install openjdk`,
+Windows는 https://adoptium.net 에서 Temurin JDK를 깔고 **Git Bash**에서 실행한다.
+
+**화면에 나온 비밀번호와 `upload.jks` 파일을 비밀번호 관리자(또는 안전한 곳)에
+보관한다.** 이 문서에서 가장 중요한 한 줄이다. 저장소에는 절대 넣지 않는다.
+
+<details>
+<summary>스크립트 없이 직접 만들려면</summary>
 
 ```bash
 keytool -genkeypair -v \
@@ -29,17 +53,10 @@ keytool -genkeypair -v \
   -alias upload
 ```
 
-- **비밀번호**를 묻는다. 길게 잡고 비밀번호 관리자에 넣어둔다. 키 비밀번호를 따로
-  물으면 같은 걸 써도 된다
-- 이름·조직은 아무거나 넣어도 되지만 거짓은 안 쓰는 게 낫다. 사용자에게 보이지 않는다
+- 비밀번호를 묻는다. 키 비밀번호를 따로 물으면 같은 걸 써도 된다
 - `-validity 10000`은 약 27년이다. 짧게 잡으면 그 날짜 이후로 업데이트를 못 낸다
 
-**이 파일과 비밀번호를 잃어버리지 않는 것**이 이 문서에서 가장 중요한 한 줄이다.
-저장소에는 절대 넣지 않는다 (`.gitignore`가 `*.jks`를 막아두긴 했다).
-
-## 2. 파일을 글자로 바꾸기
-
-GitHub 시크릿에는 파일을 못 넣으니 base64 문자열로 바꿔 넣는다.
+GitHub 시크릿에는 파일을 못 넣으니 base64 한 줄로 바꾼다:
 
 | | 명령 |
 |---|---|
@@ -47,13 +64,15 @@ GitHub 시크릿에는 파일을 못 넣으니 base64 문자열로 바꿔 넣는
 | Linux | `base64 -w0 upload.jks` |
 | Windows (PowerShell) | `[Convert]::ToBase64String([IO.File]::ReadAllBytes("upload.jks")) \| Set-Clipboard` |
 
-## 3. 저장소에 값 4개 넣기
+</details>
+
+## 2. 저장소에 값 4개 넣기
 
 **Settings → Secrets and variables → Actions → Secrets → New repository secret**
 
 | 이름 | 값 |
 |---|---|
-| `ANDROID_KEYSTORE_BASE64` | 2번에서 복사한 긴 문자열 |
+| `ANDROID_KEYSTORE_BASE64` | 스크립트가 맨 아래에 찍은 긴 한 줄 |
 | `ANDROID_KEYSTORE_PASSWORD` | 키스토어 비밀번호 |
 | `ANDROID_KEY_ALIAS` | `upload` (위 명령의 `-alias` 값) |
 | `ANDROID_KEY_PASSWORD` | 키 비밀번호 (따로 안 정했으면 키스토어 비밀번호와 같다) |
@@ -61,7 +80,7 @@ GitHub 시크릿에는 파일을 못 넣으니 base64 문자열로 바꿔 넣는
 한 번 넣으면 다시 볼 수 없다 — GitHub는 시크릿을 보여주지 않고 덮어쓰기만 된다.
 그래서 비밀번호는 본인 쪽에도 남겨둬야 한다.
 
-## 4. 번들 만들기
+## 3. 번들 만들기
 
 **Actions → Build release bundle → Run workflow**
 
@@ -84,10 +103,12 @@ GitHub 시크릿에는 파일을 못 넣으니 base64 문자열로 바꿔 넣는
 끝까지 도는지 보는 용도이고, **나오는 AAB는 Play에 올리면 안 된다** — Play는 처음 본
 키에 앱을 묶기 때문에 그걸 올리면 진짜 키를 영영 못 쓴다.
 
-## 5. 올리기
+## 4. 올리기
 
 Play Console → 테스트 → **비공개 테스트** 트랙. 내부 테스트가 아니다 — 새 개인
 개발자 계정의 「테스터 12명 × 14일」 요건은 비공개 트랙에서만 인정된다.
+
+콘솔에서 무엇을 어떻게 누르는지는 `store/play-console.md`에 순서대로 있다.
 
 ---
 

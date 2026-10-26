@@ -391,3 +391,6 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
   .mic { width: 66px; height: 66px; }
   .swipebtn { width: 54px; height: 54px; }
 }
+
+/* Quiet on purpose: it is there for the rare bad line, not as a call to action. */
+.tx-report { align-self: center; font-weight: 500; color: var(--muted); }

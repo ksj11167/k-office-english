@@ -36,6 +36,18 @@ jobs:
           # "tools", which Google removed, and sdkmanager exits 1 on the miss.
           packages: 'platform-tools platforms;android-36 build-tools;36.0.0'
 
+      # gradle would fail on a non-number too, but forty lines into a stack
+      # trace. Play also wants it to go up every time, which only a person can
+      # check — so the message says so.
+      - name: Check the version code is a number
+        env:
+          VC: ${{ inputs.version_code }}
+        run: |
+          if ! [[ "$VC" =~ ^[1-9][0-9]{0,8}$ ]]; then
+            echo "::error::version_code 는 1 이상의 정수여야 합니다 (받은 값: '$VC'). 지난번에 올린 값보다 크게 넣으세요."
+            exit 1
+          fi
+
       # Unlike the proxy's deploy, a missing setting here is always an error:
       # nobody runs this by accident, so being asked for a release without a key
       # means the key is missing, not that the step has not been reached yet.
@@ -120,6 +132,26 @@ jobs:
           echo "$out"
           if echo "$out" | grep -q 'Android Debug'; then
             echo "::error::디버그 키로 서명됐습니다 — 서명 설정이 적용되지 않았습니다. Play 는 이 번들을 받지 않습니다."
+            exit 1
+          fi
+
+      # The input travels through an env var into build.gradle, and a break
+      # anywhere on that path still builds — at versionCode 1, which Play then
+      # refuses as a duplicate on the second upload. The merged manifest is the
+      # last text form of what goes into the bundle, so read it there.
+      - name: Check the version code made it in
+        env:
+          VC: ${{ inputs.version_code }}
+        run: |
+          manifest=$(find android/app/build/intermediates -path '*release*' -name AndroidManifest.xml -exec grep -l 'versionCode' {} + | head -1)
+          if [ -z "$manifest" ]; then
+            echo "::error::합쳐진 매니페스트를 찾지 못해 versionCode 를 확인할 수 없습니다."
+            exit 1
+          fi
+          got=$(grep -o 'android:versionCode="[0-9]*"' "$manifest" | head -1 | tr -dc '0-9')
+          echo "$manifest → versionCode $got"
+          if [ "$got" != "$VC" ]; then
+            echo "::error::번들의 versionCode 가 $got 입니다 — 입력한 $VC 가 반영되지 않았습니다."
             exit 1
           fi
 
