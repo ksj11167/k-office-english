@@ -24,6 +24,11 @@
   --no: #c2410c;
   --no-deep: #963309;
   --no-soft: #fbead6;
+  /* Text in the grade colours. The fills read too light as small text on
+     their own soft grounds (3.7:1 and 4.4:1), so text takes the deep shade in
+     light and the plain one in dark, where it is the plain one that passes. */
+  --yes-text: #0a6848;
+  --no-text: #963309;
 
   --sans: "IBM Plex Sans KR", system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   --serif: "Newsreader", Georgia, "Times New Roman", serif;
@@ -42,6 +47,7 @@
     --mine: #4a3f1c; --mine-ink: #ffe8a3; --mine-line: #6b5a26;
     --yes: #4cc79a; --yes-deep: #2f9b74; --yes-soft: #14302a;
     --no: #e0954a; --no-deep: #b3712f; --no-soft: #33250f;
+    --yes-text: #4cc79a; --no-text: #e0954a;
   }
 }
 :root[data-theme="dark"] {
@@ -52,6 +58,7 @@
   --mine: #4a3f1c; --mine-ink: #ffe8a3; --mine-line: #6b5a26;
   --yes: #4cc79a; --yes-deep: #2f9b74; --yes-soft: #14302a;
   --no: #e0954a; --no-deep: #b3712f; --no-soft: #33250f;
+    --yes-text: #4cc79a; --no-text: #e0954a;
 }
 
 /* ─────────── base ─────────── */
@@ -358,11 +365,11 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
   display: inline-flex; gap: 6px; font-size: 13px; font-weight: 600;
   padding: 4px 10px; border-radius: 99px; align-self: flex-start; font-variant-numeric: tabular-nums;
 }
-.score.hit { background: var(--yes-soft); color: var(--yes); }
-.score.miss { background: var(--no-soft); color: var(--no); }
+.score.hit { background: var(--yes-soft); color: var(--yes-text); }
+.score.miss { background: var(--no-soft); color: var(--no-text); }
 .miss-words { font-size: 12.5px; color: var(--ink-2); }
 .miss-words u {
-  text-decoration: none; background: var(--no-soft); color: var(--no);
+  text-decoration: none; background: var(--no-soft); color: var(--no-text);
   padding: 1px 5px; border-radius: 5px; font-family: var(--serif); font-size: 15px;
 }
 
