@@ -5,7 +5,7 @@
   --surface-2: #f6f8fa;
   --ink: #171c25;
   --ink-2: #47505f;
-  --muted: #79818f;
+  --muted: #5f6775;   /* 4.5:1 or better on every light surface, yellow included */
   --line: #dde1e8;
   --line-2: #c8cfd9;
 
@@ -113,7 +113,9 @@ button { font-family: inherit; font-size: inherit; cursor: pointer; border: 0; b
 .btn.ghost:active { box-shadow: 0 1px 0 var(--line-2); }
 
 .iconbtn {
-  width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
+  /* 48dp is Android's minimum target and over iOS's 44pt; a back button is
+     reached for blind, mid-commute. */
+  width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center;
   color: var(--ink-2); background: var(--surface); border: 1px solid var(--line); flex: none;
 }
 
@@ -157,17 +159,17 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
    empty turn is drawn, not described: a dashed outline in the yellow of my
    own lines, waiting to be filled. */
 .hero-chat { margin: 6px 0 4px; display: flex; flex-direction: column; gap: 6px; }
-.hc { margin: 0; max-width: 86%; padding: 10px 14px; border-radius: 18px; font-size: 14.5px; line-height: 1.45; }
+.hc { margin: 0; max-width: 86%; padding: 10px 14px; border-radius: 16px; font-size: 14.5px; line-height: 1.45; }
 .hc .who { display: block; font-size: 11px; color: var(--muted); font-weight: 500; margin-bottom: 2px; }
-.hc.them { align-self: flex-start; background: var(--surface); border: 1px solid var(--line); border-bottom-left-radius: 6px; color: var(--ink-2); }
+.hc.them { align-self: flex-start; background: var(--surface); border: 1px solid var(--line); border-bottom-left-radius: 5px; color: var(--ink-2); }
 .hc.mine {
   align-self: flex-end; background: var(--mine); color: var(--mine-ink); border: 1px solid var(--mine-line);
-  border-bottom-right-radius: 6px; font-weight: 600;
+  border-bottom-right-radius: 5px; font-weight: 600;
 }
 .hc.turn {
   align-self: flex-end; min-width: 62%; text-align: right;
-  border: 2px dashed var(--mine-line); border-bottom-right-radius: 6px;
-  font-size: 14px; font-weight: 500; color: color-mix(in srgb, var(--mine-ink) 72%, transparent);
+  border: 2px dashed var(--mine-line); border-bottom-right-radius: 5px;
+  font-size: 14px; font-weight: 500; color: var(--mine-ink);
   background: color-mix(in srgb, var(--mine) 28%, transparent);
 }
 .wordmark span { font-size: 14px; font-weight: 700; letter-spacing: -.01em; color: var(--ink-2); }
@@ -198,7 +200,8 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
 .whoami b { color: var(--ink); font-weight: 600; }
 .linkbtn {
   font-size: 13.5px; font-weight: 600; color: var(--accent);
-  padding: 6px 2px; text-decoration: underline; text-underline-offset: 3px;
+  padding: 6px 4px; text-decoration: underline; text-underline-offset: 3px;
+  min-height: 48px; display: inline-flex; align-items: center; justify-content: center;
 }
 
 .picker {
@@ -333,7 +336,7 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
 
 /* Hear it, then say it. Sized as a real touch target, not a glyph. */
 .say {
-  flex: none; width: 42px; height: 42px; border-radius: 50%;
+  flex: none; width: 48px; height: 48px; border-radius: 50%;
   display: grid; place-items: center; margin-top: -2px;
   color: var(--accent); background: var(--accent-soft);
   border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
@@ -364,7 +367,7 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
 }
 
 .flip {
-  align-self: stretch; margin-top: auto; min-height: 46px; border-radius: 12px;
+  align-self: stretch; margin-top: auto; min-height: 50px; border-radius: 12px;
   border: 2px solid var(--line-2); background: var(--surface-2);
   font-weight: 600; font-size: 14.5px; color: var(--ink-2);
 }
