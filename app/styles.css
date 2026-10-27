@@ -1,64 +1,72 @@
-/* ─────────── tokens ─────────── */
+/* ─────────── tokens ───────────
+   Flat and quiet, like the banking and messaging apps this audience opens every
+   day: a white page, one blue for actions, soft grey fills instead of borders,
+   and no drop edges under buttons. My own lines stay yellow; that is the one
+   colour that means something about the content rather than the interface.
+   Every text colour clears 4.5:1 on the surfaces it sits on, which is why the
+   greys and the blue are a shade deeper than the usual fintech values. */
 :root {
-  --ground: #eef1f5;
+  --ground: #ffffff;
   --surface: #ffffff;
-  --surface-2: #f6f8fa;
-  --ink: #171c25;
-  --ink-2: #47505f;
-  --muted: #5f6775;   /* 4.5:1 or better on every light surface, yellow included */
-  --line: #dde1e8;
-  --line-2: #c8cfd9;
+  --surface-2: #f2f4f6;   /* the fill that replaces borders: bubbles, secondary buttons, rows */
+  --surface-3: #e8ebee;   /* a fill pressed or one step stronger */
+  --ink: #191f28;
+  --ink-2: #4e5968;
+  --muted: #66707c;       /* 5.0:1 on white, 4.6:1 on surface-2 */
+  --line: #e5e8eb;
+  --line-2: #d1d6db;
 
-  --accent: #2952e3;
-  --accent-deep: #1c3bae;
+  --accent: #2b63db;      /* white on it 5.4:1; as text 4.8:1 on surface-2 and accent-soft */
+  --accent-deep: #2253c0;
   --accent-ink: #ffffff;
-  --accent-soft: #e6ebfd;
+  --accent-soft: #ecf2fe;
 
-  --mine: #ffe8a3;
-  --mine-ink: #4a3c10;
-  --mine-line: #f0d383;
+  --mine: #fff1c2;
+  --mine-ink: #5a4300;
+  --mine-line: #ffe08a;
 
   --yes: #0e8a5f;
   --yes-deep: #0a6848;
-  --yes-soft: #dff2e9;
+  --yes-soft: #e3f5ec;
   --no: #c2410c;
   --no-deep: #963309;
-  --no-soft: #fbead6;
-  /* Text in the grade colours. The fills read too light as small text on
-     their own soft grounds (3.7:1 and 4.4:1), so text takes the deep shade in
-     light and the plain one in dark, where it is the plain one that passes. */
+  --no-soft: #fdeee3;
+  /* Text in the grade colours: the deep shade in light, the plain one in dark,
+     whichever clears 4.5:1 on its own soft ground. */
   --yes-text: #0a6848;
   --no-text: #963309;
 
-  --sans: "IBM Plex Sans KR", system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --sans: "Noto Sans KR", system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   --serif: "Newsreader", Georgia, "Times New Roman", serif;
-  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --r-md: 14px;
-  --r-lg: 22px;
+  --r-md: 16px;
+  --r-lg: 24px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --ground: #0e1219; --surface: #171c25; --surface-2: #1e242f;
-    --ink: #e9edf3; --ink-2: #b3bcc9; --muted: #8a93a1;
-    --line: #2b323e; --line-2: #3b4452;
-    --accent: #6b8dff; --accent-deep: #4668d8; --accent-ink: #0e1219; --accent-soft: #1d2740;
-    --mine: #4a3f1c; --mine-ink: #ffe8a3; --mine-line: #6b5a26;
+    --ground: #121418; --surface: #1b1e24; --surface-2: #23272e; --surface-3: #2c3139;
+    --ink: #f2f4f6; --ink-2: #b0b8c1; --muted: #8b95a1;
+    --line: #2c3038; --line-2: #3a3f48;
+    --accent: #5b8cff; --accent-deep: #4677f0; --accent-ink: #0b1220; --accent-soft: #1d2740;
+    --mine: #3d3416; --mine-ink: #ffe08a; --mine-line: #5c4d1c;
     --yes: #4cc79a; --yes-deep: #2f9b74; --yes-soft: #14302a;
     --no: #e0954a; --no-deep: #b3712f; --no-soft: #33250f;
     --yes-text: #4cc79a; --no-text: #e0954a;
+    color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --ground: #0e1219; --surface: #171c25; --surface-2: #1e242f;
-  --ink: #e9edf3; --ink-2: #b3bcc9; --muted: #8a93a1;
-  --line: #2b323e; --line-2: #3b4452;
-  --accent: #6b8dff; --accent-deep: #4668d8; --accent-ink: #0e1219; --accent-soft: #1d2740;
-  --mine: #4a3f1c; --mine-ink: #ffe8a3; --mine-line: #6b5a26;
+  --ground: #121418; --surface: #1b1e24; --surface-2: #23272e; --surface-3: #2c3139;
+  --ink: #f2f4f6; --ink-2: #b0b8c1; --muted: #8b95a1;
+  --line: #2c3038; --line-2: #3a3f48;
+  --accent: #5b8cff; --accent-deep: #4677f0; --accent-ink: #0b1220; --accent-soft: #1d2740;
+  --mine: #3d3416; --mine-ink: #ffe08a; --mine-line: #5c4d1c;
   --yes: #4cc79a; --yes-deep: #2f9b74; --yes-soft: #14302a;
   --no: #e0954a; --no-deep: #b3712f; --no-soft: #33250f;
-    --yes-text: #4cc79a; --no-text: #e0954a;
+  --yes-text: #4cc79a; --no-text: #e0954a;
+  color-scheme: dark;
 }
 
 /* ─────────── base ─────────── */
@@ -71,7 +79,9 @@ body {
   font-family: var(--sans);
   font-size: 16px;
   line-height: 1.5;
+  letter-spacing: -.01em;
   -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
   /* Korean wraps between words, not between syllables: "골/라" mid-word reads
      as a typo. break-word still rescues a URL or an unbroken English string. */
   word-break: keep-all; overflow-wrap: break-word;
@@ -79,171 +89,173 @@ body {
 }
 #app {
   max-width: 480px; margin: 0 auto; min-height: 100%;
-  padding-inline: 18px; padding-block: 0 20px;
+  padding-inline: 24px; padding-block: 0 24px;
   display: flex; flex-direction: column;
 }
 .screen { display: none; flex: 1; flex-direction: column; min-height: 0; }
 .screen.on { display: flex; }
 .hide { display: none !important; }
 
-h1 { font-size: 27px; line-height: 1.24; font-weight: 700; letter-spacing: -.015em; margin: 0; text-wrap: balance; }
-h2 { font-size: 18px; font-weight: 600; margin: 0; letter-spacing: -.01em; }
+h1 { font-size: 28px; line-height: 1.35; font-weight: 800; letter-spacing: -.035em; margin: 0; text-wrap: balance; }
+h2 { font-size: 19px; font-weight: 700; margin: 0; letter-spacing: -.025em; }
 p { margin: 0; color: var(--ink-2); }
-.small { font-size: 13.5px; color: var(--muted); line-height: 1.55; }
-.eyebrow { font-size: 13px; font-weight: 600; color: var(--accent); }
-.stack { display: flex; flex-direction: column; gap: 14px; }
+.small { font-size: 14px; color: var(--muted); line-height: 1.6; }
+.eyebrow { font-size: 14px; font-weight: 700; color: var(--accent); }
+.stack { display: flex; flex-direction: column; gap: 10px; }
 .center {
   flex: 1; display: flex; flex-direction: column; justify-content: center;
   align-items: center; gap: 18px; text-align: center; padding-block: 40px;
 }
 
-/* ─────────── buttons: the chunky, pressable kind ─────────── */
-button { font-family: inherit; font-size: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
-:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 10px; }
+/* ─────────── buttons: flat, filled, pressed by shrinking ─────────── */
+button { font-family: inherit; font-size: inherit; letter-spacing: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 12px; }
 
 .btn {
   text-decoration: none;
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  min-height: 52px; padding: 0 20px; border-radius: var(--r-md);
-  font-weight: 700; font-size: 15.5px; letter-spacing: -.01em;
+  min-height: 56px; padding: 0 20px; border-radius: var(--r-md);
+  font-weight: 700; font-size: 17px; letter-spacing: -.02em;
   background: var(--accent); color: var(--accent-ink);
-  box-shadow: 0 4px 0 var(--accent-deep);
-  transition: transform .06s ease, box-shadow .06s ease;
+  transition: transform .1s ease, background-color .1s ease;
 }
-.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--accent-deep); }
-.btn[disabled] { opacity: .4; cursor: default; box-shadow: 0 4px 0 var(--accent-deep); transform: none; }
+.btn:active { transform: scale(.98); background: var(--accent-deep); }
+/* Disabled reads as unavailable through colour, not by fading the whole
+   button, so its label (which says what is missing) stays legible. */
+.btn[disabled] { background: var(--surface-2); color: var(--muted); cursor: default; transform: none; }
 .btn.wide { width: 100%; }
-.btn.ghost {
-  background: var(--surface); color: var(--ink-2); font-weight: 600;
-  border: 2px solid var(--line-2); box-shadow: 0 4px 0 var(--line-2);
-}
-.btn.ghost:active { box-shadow: 0 1px 0 var(--line-2); }
+.btn.ghost { background: var(--surface-2); color: var(--ink-2); font-weight: 600; font-size: 16px; }
+.btn.ghost:active { background: var(--surface-3); }
 
 .iconbtn {
   /* 48dp is Android's minimum target and over iOS's 44pt; a back button is
-     reached for blind, mid-commute. */
+     reached for blind, mid-commute. The circle shows only when pressed. */
   width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center;
-  color: var(--ink-2); background: var(--surface); border: 1px solid var(--line); flex: none;
+  color: var(--ink); flex: none; margin-left: -12px;
+  transition: background-color .1s ease;
 }
+.iconbtn:active { background: var(--surface-2); }
 
 /* ─────────── panels, forms ─────────── */
 .panel {
-  background: var(--surface); border: 1px solid var(--line);
+  background: var(--surface-2);
   border-radius: var(--r-lg); padding: 20px;
-  display: flex; flex-direction: column; gap: 13px;
+  display: flex; flex-direction: column; gap: 14px;
 }
 textarea, input[type="password"], input[type="text"], select {
-  width: 100%; font-family: var(--mono); font-size: 12.5px; line-height: 1.6;
-  color: var(--ink); background: var(--surface-2);
-  border: 1px solid var(--line); border-radius: var(--r-md); padding: 13px;
+  width: 100%; font-family: var(--mono); font-size: 13px; line-height: 1.6;
+  color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 14px; padding: 14px;
 }
 textarea { min-height: 108px; resize: vertical; }
-input[type="password"], input[type="text"], select { font-size: 14px; min-height: 48px; }
-select { font-family: var(--sans); }
-textarea:focus, input:focus, select:focus { outline: 3px solid var(--accent); outline-offset: -1px; }
+input[type="password"], input[type="text"], select { font-family: var(--sans); font-size: 15px; min-height: 52px; }
+textarea:focus, input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
 input[type="file"] { position: absolute; width: 1px; height: 1px; opacity: 0; }
-label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--ink-2); font-weight: 500; }
+label.field { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--ink-2); font-weight: 600; }
 
-.howto { display: grid; grid-template-columns: auto 1fr; gap: 7px 12px; align-items: baseline; }
-.howto dt { font-size: 13px; color: var(--accent); font-weight: 700; font-variant-numeric: tabular-nums; }
-.howto dd { margin: 0; font-size: 13.5px; color: var(--ink-2); }
+.howto { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; align-items: baseline; }
+.howto dt { font-size: 14px; color: var(--accent); font-weight: 700; font-variant-numeric: tabular-nums; }
+.howto dd { margin: 0; font-size: 14px; color: var(--ink-2); }
 
 .note {
-  padding: 13px 15px; border-radius: var(--r-md); background: var(--yes-soft);
-  font-size: 13px; line-height: 1.55; color: var(--ink-2);
-  border: 1px solid color-mix(in srgb, var(--yes) 22%, transparent);
+  padding: 14px 16px; border-radius: 14px; background: var(--surface-2);
+  font-size: 14px; line-height: 1.6; color: var(--ink-2);
 }
-.note b { color: var(--ink); font-weight: 600; }
-.note.warn { background: var(--no-soft); border-color: color-mix(in srgb, var(--no) 26%, transparent); }
+.note b { color: var(--ink); font-weight: 700; }
+.note.warn { background: var(--no-soft); }
+/* A reassurance that does not need a box: one quiet line under the actions. */
+.fine { font-size: 13px; line-height: 1.5; color: var(--muted); text-align: center; padding-top: 6px; }
 
 /* ─────────── header bits ─────────── */
-.masthead { padding-block: 36px 20px; display: flex; flex-direction: column; gap: 11px; }
-.wordmark { display: flex; align-items: center; gap: 9px; }
-.wordmark .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--accent); flex: none; }
+.masthead { padding-block: 20px 8px; display: flex; flex-direction: column; gap: 12px; }
+.homebar { display: flex; align-items: center; justify-content: space-between; min-height: 48px; }
+.homebar .iconbtn { margin-left: 0; margin-right: -12px; color: var(--ink-2); }
+.wordmark { display: flex; align-items: center; gap: 8px; }
+.wordmark .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex: none; }
+.wordmark span { font-size: 16px; font-weight: 800; letter-spacing: -.03em; color: var(--ink); }
 
 /* ── the first screen's one loud thing: a real exchange with my turn empty ──
-   Same bubbles the transcript uses, so the promise and the product match. The
-   empty turn is drawn, not described: a dashed outline in the yellow of my
-   own lines, waiting to be filled. */
-.hero-chat { margin: 6px 0 4px; display: flex; flex-direction: column; gap: 6px; }
-.hc { margin: 0; max-width: 86%; padding: 10px 14px; border-radius: 16px; font-size: 14.5px; line-height: 1.45; }
-.hc .who { display: block; font-size: 11px; color: var(--muted); font-weight: 500; margin-bottom: 2px; }
-.hc.them { align-self: flex-start; background: var(--surface); border: 1px solid var(--line); border-bottom-left-radius: 5px; color: var(--ink-2); }
-.hc.mine {
-  align-self: flex-end; background: var(--mine); color: var(--mine-ink); border: 1px solid var(--mine-line);
-  border-bottom-right-radius: 5px; font-weight: 600;
-}
+   Same bubbles the transcript uses, so the promise and the product match. My
+   turn is a bubble with a typing indicator in it: the conversation is waiting
+   on me. */
+.hero-chat { margin: 24px 0 20px; display: flex; flex-direction: column; gap: 6px; }
+.hc { margin: 0; max-width: 84%; padding: 12px 16px; border-radius: 20px; font-size: 15px; line-height: 1.45; }
+.hc .who { display: block; font-size: 12px; color: var(--muted); font-weight: 500; margin-bottom: 3px; }
+.hc.them { align-self: flex-start; background: var(--surface-2); border-bottom-left-radius: 6px; color: var(--ink-2); }
+.hc.mine { align-self: flex-end; background: var(--mine); color: var(--mine-ink); border-bottom-right-radius: 6px; font-weight: 600; }
 .hc.turn {
-  align-self: flex-end; min-width: 62%; text-align: right;
-  border: 2px dashed var(--mine-line); border-bottom-right-radius: 5px;
-  font-size: 14px; font-weight: 500; color: var(--mine-ink);
-  background: color-mix(in srgb, var(--mine) 28%, transparent);
+  align-self: flex-end; display: flex; gap: 5px; padding: 17px 20px;
+  background: var(--surface-2); border-bottom-right-radius: 6px;
 }
-.wordmark span { font-size: 14px; font-weight: 700; letter-spacing: -.01em; color: var(--ink-2); }
+.hc.turn i { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.hc.turn i:nth-child(2) { opacity: .55; }
+.hc.turn i:nth-child(3) { opacity: .28; }
 
 .topbar {
-  display: flex; align-items: center; gap: 12px; padding-block: 16px 14px;
+  display: flex; align-items: center; gap: 6px; padding-block: 12px 12px; min-height: 72px;
   position: sticky; top: env(safe-area-inset-top, 0px); background: var(--ground); z-index: 5;
 }
 .topbar h2 { flex: 1; }
 
-.statline { display: flex; flex-wrap: wrap; gap: 6px 18px; }
-.stat { display: flex; flex-direction: column; gap: 1px; }
-.stat b { font-size: 21px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); }
-.stat span { font-size: 11.5px; color: var(--muted); }
+.statline { display: flex; flex-wrap: wrap; gap: 6px 24px; }
+.stat { display: flex; flex-direction: column; gap: 2px; }
+.stat b { font-size: 22px; font-weight: 800; letter-spacing: -.03em; font-variant-numeric: tabular-nums; color: var(--ink); }
+.stat span { font-size: 13px; color: var(--muted); }
 
-.rail { width: 100%; height: 10px; background: var(--line); border-radius: 99px; overflow: hidden; }
+.rail { width: 100%; height: 6px; background: var(--surface-2); border-radius: 99px; overflow: hidden; }
 .rail i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .35s ease; }
-.rail.thin { height: 5px; }
-.spin { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--accent); animation: spin 1s linear infinite; }
+.rail.thin { height: 4px; }
+.spin { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--surface-2); border-top-color: var(--accent); animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ─────────── pickers, day list ─────────── */
 .pickers { display: flex; flex-direction: column; gap: 8px; }
 /* Once answered, the question is a line, not a panel. */
-.panel.slim { padding: 12px 15px; }
+.panel.slim { padding: 6px 6px 6px 18px; border-radius: var(--r-md); }
 .whoami { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.whoami span { font-size: 14px; color: var(--ink-2); }
-.whoami b { color: var(--ink); font-weight: 600; }
+.whoami span { font-size: 15px; color: var(--ink-2); }
+.whoami b { color: var(--ink); font-weight: 700; }
 .linkbtn {
-  font-size: 13.5px; font-weight: 600; color: var(--accent);
-  padding: 6px 4px; text-decoration: underline; text-underline-offset: 3px;
-  min-height: 48px; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 600; color: var(--accent);
+  padding: 6px 12px; min-height: 48px; border-radius: 12px;
+  display: inline-flex; align-items: center; justify-content: center;
 }
+.linkbtn:active { background: var(--surface-3); }
 
 .picker {
-  display: flex; align-items: center; gap: 12px; padding: 13px 15px;
-  border-radius: var(--r-md); border: 2px solid var(--line); background: var(--surface); cursor: pointer;
+  display: flex; align-items: center; gap: 12px; padding: 16px 18px;
+  border-radius: var(--r-md); background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--line); cursor: pointer;
 }
-.picker:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
-.picker input { accent-color: var(--accent); width: 18px; height: 18px; flex: none; }
-.picker .nm { flex: 1; font-weight: 600; }
-.picker .ct { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.picker:has(input:checked) { box-shadow: inset 0 0 0 2px var(--accent); background: var(--accent-soft); }
+.picker input { accent-color: var(--accent); width: 20px; height: 20px; flex: none; }
+.picker .nm { flex: 1; font-weight: 700; }
+.picker .ct { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
 
 .days { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
 .day {
-  display: flex; align-items: center; gap: 13px; width: 100%;
-  padding: 15px; border-radius: var(--r-md);
-  border: 2px solid var(--line); background: var(--surface); text-align: left;
+  display: flex; align-items: center; gap: 14px; width: 100%;
+  padding: 16px 18px; border-radius: var(--r-md);
+  background: var(--surface-2); text-align: left;
+  transition: transform .1s ease, background-color .1s ease;
 }
-.day:active { transform: translateY(2px); }
+.day:active { transform: scale(.985); background: var(--surface-3); }
 .day .when { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-.day .when b { font-size: 15.5px; font-weight: 700; letter-spacing: -.01em; }
-.day .when span { font-size: 12px; color: var(--muted); }
-.day .n { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; flex: none; }
+.day .when b { font-size: 16px; font-weight: 700; letter-spacing: -.02em; }
+.day .when span { font-size: 13px; color: var(--muted); }
+.day .n { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; flex: none; }
 /* The date itself is the marker: grey before it is touched, blue while it is
    in progress, green once it is done. */
 .day .dd {
-  flex: none; width: 44px; text-align: center;
-  font-size: 28px; line-height: 1; font-weight: 700; letter-spacing: -.03em;
+  flex: none; width: 40px; text-align: center;
+  font-size: 28px; line-height: 1; font-weight: 800; letter-spacing: -.04em;
   font-variant-numeric: tabular-nums; color: var(--muted);
 }
-.day.ready { border-color: var(--accent); }
+.day.ready { background: var(--accent-soft); }
 .day.ready .dd { color: var(--accent); }
 .day.done .dd { color: var(--yes); }
 .day.done .when b { color: var(--muted); font-weight: 500; }
 
-.transcript { display: flex; flex-direction: column; gap: 7px; max-height: 230px; overflow-y: auto; padding: 4px 2px; }
+.transcript { display: flex; flex-direction: column; gap: 6px; max-height: 230px; overflow-y: auto; padding: 4px 0; }
 /* The English conversation is the point of the screen, not a preview strip, so
    it gets the height the day's chat actually needs. */
 .transcript.tall { max-height: none; flex: 1; min-height: 0; }
@@ -251,33 +263,34 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
 
 /* ─────────── chat bubbles ─────────── */
 .bub {
-  max-width: 86%; padding: 9px 13px; border-radius: 16px;
-  font-size: 14px; line-height: 1.5; white-space: pre-wrap; word-break: break-word;
-  border: 1px solid var(--line); background: var(--surface-2); color: var(--ink-2);
-  align-self: flex-start; border-bottom-left-radius: 5px;
+  max-width: 84%; padding: 11px 15px; border-radius: 20px;
+  font-size: 15px; line-height: 1.5; white-space: pre-wrap; word-break: break-word;
+  background: var(--surface-2); color: var(--ink-2);
+  align-self: flex-start; border-bottom-left-radius: 6px;
 }
 .bub.mine {
-  align-self: flex-end; background: var(--mine); color: var(--mine-ink); border-color: var(--mine-line);
-  border-bottom-left-radius: 16px; border-bottom-right-radius: 5px;
+  align-self: flex-end; background: var(--mine); color: var(--mine-ink);
+  border-bottom-left-radius: 20px; border-bottom-right-radius: 6px;
 }
-.bub .who { display: block; font-size: 11px; color: var(--muted); margin-bottom: 3px; font-weight: 500; }
-.bub.mine .who { color: var(--mine-ink); opacity: .7; }
+.bub .who { display: block; font-size: 12px; color: var(--muted); margin-bottom: 3px; font-weight: 500; }
+.bub.mine .who { color: var(--mine-ink); opacity: .75; }
 
 /* English carries the line; the Korean underneath is what I actually typed, kept
    close enough to compare without turning the bubble into two paragraphs. */
 .en-line { display: block; }
 .ko-line {
-  display: block; margin-top: 5px; padding-top: 5px;
-  border-top: 1px solid color-mix(in srgb, currentColor 18%, transparent);
-  font-size: 12.5px; opacity: .72;
+  display: block; margin-top: 6px; padding-top: 6px;
+  border-top: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+  font-size: 13px; opacity: .75;
 }
 
 .bub.media { font-style: italic; color: var(--muted); }
 
 /* ─────────── practice: the swipe deck ─────────── */
-.pr-head { display: flex; align-items: center; gap: 12px; padding-block: 14px 12px; }
+.pr-head { display: flex; align-items: center; gap: 10px; padding-block: 12px; }
+.pr-head .iconbtn { margin-left: -12px; }
 .pr-head .rail { flex: 1; }
-.counter { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; flex: none; font-weight: 500; }
+.counter { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; flex: none; font-weight: 600; }
 
 /* A card, not a panel: on a tall phone an edge-to-edge card is mostly empty
    white, so the deck is capped and the slack goes above it. That also puts the
@@ -289,13 +302,13 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
 }
 .deck:focus-visible { outline: 3px solid var(--accent); outline-offset: 6px; border-radius: var(--r-lg); }
 
+/* The one object with a shadow, because it is the one thing picked up. */
 .swipe-card {
   position: absolute; inset: 0;
   background: var(--surface);
-  border: 1px solid var(--line);
   border-radius: var(--r-lg);
-  box-shadow: 0 8px 26px rgba(15, 20, 30, .09);
-  padding: 18px;
+  box-shadow: 0 0 0 1px var(--line), 0 10px 30px rgba(25, 31, 40, .08);
+  padding: 20px;
   display: flex; flex-direction: column;
   overflow: hidden;
   will-change: transform;
@@ -308,109 +321,111 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
 
 .verdict {
   position: absolute; top: 20px; z-index: 3;
-  font-size: 19px; font-weight: 800; letter-spacing: -.02em;
-  padding: 7px 15px; border-radius: 11px; border: 3px solid currentColor;
+  font-size: 18px; font-weight: 800; letter-spacing: -.02em;
+  padding: 8px 14px; border-radius: 12px; color: var(--ground);
   opacity: 0; pointer-events: none;
 }
-.verdict.yes { right: 20px; color: var(--yes); transform: rotate(11deg); }
-.verdict.no { left: 20px; color: var(--no); transform: rotate(-11deg); }
+/* The text shades double as fills here: deep in light, plain in dark, and the
+   page ground as the text on them clears 6:1 either way. */
+.verdict.yes { right: 20px; background: var(--yes-text); }
+.verdict.no { left: 20px; background: var(--no-text); }
 
 .tags { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .tag {
-  font-size: 12px;
-  padding: 4px 10px; border-radius: 99px;
-  background: var(--accent-soft); color: var(--accent); font-weight: 500;
+  font-size: 13px; font-weight: 600;
+  padding: 5px 10px; border-radius: 8px;
+  background: var(--accent-soft); color: var(--accent);
 }
-.tag.rev { background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); }
+.tag.rev { background: var(--surface-2); color: var(--muted); }
 
 .ctx { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; min-height: 0; }
 .target {
-  background: var(--mine); color: var(--mine-ink); border: 1px solid var(--mine-line);
-  border-radius: 18px; border-bottom-right-radius: 6px; padding: 14px 16px;
-  font-size: 19px; line-height: 1.45; font-weight: 600;
-  white-space: pre-wrap; word-break: keep-all; overflow-wrap: anywhere; align-self: flex-end; max-width: 96%;
+  background: var(--mine); color: var(--mine-ink);
+  border-radius: 22px; border-bottom-right-radius: 8px; padding: 16px 20px;
+  font-size: 21px; line-height: 1.4; font-weight: 700; letter-spacing: -.03em;
+  white-space: pre-wrap; word-break: keep-all; overflow-wrap: anywhere; align-self: flex-end; max-width: 94%;
 }
 
 /* Pushed to the bottom of the card: the sentence you are about to say sits
    closest to the mic, and the card does not show a hole before the flip. */
 .answer {
-  margin-top: auto; border-top: 2px dashed var(--line); padding-top: 13px;
-  display: flex; flex-direction: column; gap: 8px;
+  margin-top: auto; border-top: 1px solid var(--line); padding-top: 16px;
+  display: flex; flex-direction: column; gap: 10px;
 }
 .en-row { display: flex; align-items: flex-start; gap: 10px; }
 .en-row .en { flex: 1; min-width: 0; }
-.en { font-family: var(--serif); font-size: 24px; line-height: 1.3; color: var(--ink); text-wrap: balance; }
+.en { font-family: var(--serif); font-size: 25px; line-height: 1.3; color: var(--ink); letter-spacing: 0; text-wrap: balance; }
 
 /* Hear it, then say it. Sized as a real touch target, not a glyph. */
 .say {
   flex: none; width: 48px; height: 48px; border-radius: 50%;
-  display: grid; place-items: center; margin-top: -2px;
+  display: grid; place-items: center; margin-top: -4px;
   color: var(--accent); background: var(--accent-soft);
-  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
-  transition: transform .08s ease;
+  transition: transform .1s ease;
 }
 .say svg { width: 20px; height: 20px; }
-.say:active { transform: scale(.9); }
+.say:active { transform: scale(.92); }
 .say.playing { background: var(--accent); color: var(--accent-ink); }
 
 /* In the transcript a whole bubble is the target — the sentences are short and
    a per-line button would crowd every one of them. */
 .transcript.speakable .bub[data-en]:not([data-en=""]) { cursor: pointer; }
-.bub.playing { outline: 2px solid var(--accent); outline-offset: 1px; }
+.bub.playing { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 @media (prefers-reduced-motion: reduce) { .say:active { transform: none; } }
-.heard { font-size: 13px; color: var(--muted); font-style: italic; }
-.heard b { font-style: normal; color: var(--ink-2); font-weight: 500; }
+.heard { font-size: 14px; color: var(--muted); }
+.heard b { color: var(--ink-2); font-weight: 600; }
 .score {
-  display: inline-flex; gap: 6px; font-size: 13px; font-weight: 600;
-  padding: 4px 10px; border-radius: 99px; align-self: flex-start; font-variant-numeric: tabular-nums;
+  display: inline-flex; gap: 6px; font-size: 14px; font-weight: 700;
+  padding: 5px 10px; border-radius: 8px; align-self: flex-start; font-variant-numeric: tabular-nums;
 }
 .score.hit { background: var(--yes-soft); color: var(--yes-text); }
 .score.miss { background: var(--no-soft); color: var(--no-text); }
-.miss-words { font-size: 12.5px; color: var(--ink-2); }
+.miss-words { font-size: 13px; color: var(--ink-2); }
 .miss-words u {
   text-decoration: none; background: var(--no-soft); color: var(--no-text);
-  padding: 1px 5px; border-radius: 5px; font-family: var(--serif); font-size: 15px;
+  padding: 1px 6px; border-radius: 6px; font-family: var(--serif); font-size: 15px;
 }
 
 .flip {
-  align-self: stretch; margin-top: auto; min-height: 50px; border-radius: 12px;
-  border: 2px solid var(--line-2); background: var(--surface-2);
-  font-weight: 600; font-size: 14.5px; color: var(--ink-2);
+  align-self: stretch; margin-top: auto; min-height: 56px; border-radius: var(--r-md);
+  background: var(--surface-2);
+  font-weight: 700; font-size: 16px; color: var(--ink);
+  transition: background-color .1s ease;
 }
+.flip:active { background: var(--surface-3); }
 
 /* dock: left / mic / right */
 .dock {
-  display: flex; align-items: center; justify-content: center; gap: 16px;
+  display: flex; align-items: center; justify-content: center; gap: 28px;
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 .swipebtn {
   width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center;
-  background: var(--surface); border: 3px solid var(--line-2); flex: none;
-  transition: transform .08s ease;
+  background: var(--surface-2); flex: none;
+  transition: transform .1s ease, background-color .1s ease;
 }
-.swipebtn:active { transform: scale(.92); }
-.swipebtn.no { border-color: var(--no); color: var(--no); }
-.swipebtn.yes { border-color: var(--yes); color: var(--yes); }
+.swipebtn:active { transform: scale(.92); background: var(--surface-3); }
+.swipebtn.no { color: var(--no); }
+.swipebtn.yes { color: var(--yes); }
 .swipebtn svg { width: 26px; height: 26px; }
 
 .mic {
-  width: 76px; height: 76px; border-radius: 50%;
+  width: 78px; height: 78px; border-radius: 50%;
   background: var(--accent); color: var(--accent-ink);
   display: grid; place-items: center; flex: none;
-  box-shadow: 0 5px 0 var(--accent-deep);
-  transition: transform .08s ease, box-shadow .08s ease;
+  transition: transform .1s ease, background-color .1s ease;
 }
-.mic:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--accent-deep); }
-.mic[disabled] { opacity: .4; }
+.mic:active { transform: scale(.95); background: var(--accent-deep); }
+.mic[disabled] { background: var(--surface-2); color: var(--muted); }
 .mic.live { animation: pulse 1.3s ease-in-out infinite; }
 @keyframes pulse {
-  0%, 100% { box-shadow: 0 5px 0 var(--accent-deep), 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); }
-  50% { box-shadow: 0 5px 0 var(--accent-deep), 0 0 0 14px color-mix(in srgb, var(--accent) 0%, transparent); }
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 40%, transparent); }
+  50% { box-shadow: 0 0 0 16px color-mix(in srgb, var(--accent) 0%, transparent); }
 }
-.mic svg { width: 31px; height: 31px; }
+.mic svg { width: 30px; height: 30px; }
 
-.hint { font-size: 13px; color: var(--muted); text-align: center; min-height: 20px; padding-bottom: 10px; }
+.hint { font-size: 14px; color: var(--muted); text-align: center; min-height: 22px; padding-bottom: 12px; }
 
 @media (prefers-reduced-motion: reduce) {
   .mic.live { animation: none; }
@@ -421,14 +436,14 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
 
 @media (max-height: 700px) {
   .deck { min-height: 290px; }
-  .target { font-size: 17px; }
-  .en { font-size: 21px; }
-  .mic { width: 66px; height: 66px; }
+  .target { font-size: 18px; }
+  .en { font-size: 22px; }
+  .mic { width: 68px; height: 68px; }
   .swipebtn { width: 54px; height: 54px; }
 }
 
 /* Quiet on purpose: it is there for the rare bad line, not as a call to action. */
-.tx-report { align-self: center; font-weight: 500; color: var(--muted); }
+.tx-report { align-self: center; font-weight: 500; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
 
 /* ─────────── big screens: an unfolded foldable, a tablet, a desktop ───────────
    The phone column is 480px, and on an unfolded Fold that leaves more than a
@@ -443,7 +458,8 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
   /* Unfolded, the first screen has room for the example and the actions side
      by side, so neither has to be scrolled to. */
   #s-home { max-width: 960px; }
-  #s-home.on { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); column-gap: 48px; align-items: center; }
+  #s-home.on { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); column-gap: 56px; align-items: center; }
+  #s-home .stack { margin-top: 0; }
   #s-home .masthead { padding-block: 40px; }
 
   /* Most screens are a short form or a column of buttons. Stretched to 1000px
@@ -476,7 +492,7 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
   /* A wider card read at arm's length: the type grows with it. */
   .swipe-card { padding: 26px; }
   .ctx .bub { font-size: 15.5px; }
-  .target { font-size: 23px; }
+  .target { font-size: 24px; }
   .en { font-size: 30px; }
 }
 

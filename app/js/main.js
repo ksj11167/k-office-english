@@ -98,8 +98,10 @@ function refreshHome() {
   $('home-sample').classList.toggle('hide', has);
   $('home-note').classList.toggle('hide', canTranslate);
 
-  $('go-import').classList.toggle('ghost', !canTranslate && !has);
-  $('home-sample').classList.toggle('ghost', !canTranslate);
+  // Exactly one filled button: resume when there is something to resume,
+  // else import when it can work, else the sample.
+  $('go-import').classList.toggle('ghost', has || !canTranslate);
+  $('home-sample').classList.toggle('ghost', canTranslate);
   $('go-import').textContent = canTranslate
     ? '내 카톡 대화 가져오기'
     : '내 카톡 대화 가져오기 (API 키 필요)';

@@ -14,7 +14,7 @@
 <title>K-직장인 영어</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
 <link rel="stylesheet" href="styles.css">
 
 <div id="app">
@@ -22,26 +22,28 @@
   <!-- ══════ HOME ══════ -->
   <section class="screen on" id="s-home">
     <div class="masthead">
-      <div class="wordmark"><i class="dot"></i><span>K-직장인 영어</span></div>
+      <div class="homebar">
+        <div class="wordmark"><i class="dot"></i><span>K-직장인 영어</span></div>
+        <button class="iconbtn" id="go-settings" aria-label="설정"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+      </div>
       <!-- The product in one glance: yesterday's question in English, my own
-           answer in Korean, and the gap where my English goes. That gap is
-           the whole app, so it is the one loud thing on the screen. -->
+           answer in Korean, and my turn, still being typed. That turn is the
+           whole app, so it is the one loud thing on the screen. -->
       <figure class="hero-chat" aria-label="예시 대화: 팀장님의 영어 질문, 내가 한국어로 한 대답, 그리고 영어로 채울 내 차례">
         <p class="hc them"><span class="who">박팀장</span>Sejin, where did that deploy end up yesterday?</p>
         <p class="hc mine">지금 QA 돌리고 있습니다</p>
-        <p class="hc turn" aria-hidden="true">영어로 말할 차례</p>
+        <p class="hc turn" aria-hidden="true"><i></i><i></i><i></i></p>
       </figure>
-      <h1>어제 단톡방을<br>영어로 읽고, 말해보기</h1>
-      <p class="small">카톡 대화를 통째로 영어로 옮깁니다. 그 중 <b>내가 한 말</b>만 골라 카드로 연습합니다 — 교재 문장이 아니라 내가 진짜 쓴 말로.</p>
+      <h1>어제 단톡방 대화로<br>영어 말하기 연습</h1>
+      <p>카톡 대화를 영어로 옮기고, 내가 한 말만 골라 말하기 카드로 만듭니다.</p>
     </div>
 
-    <div class="stack" style="min-height:0">
+    <div class="stack" style="margin-top:auto; padding-top:24px">
       <button class="btn wide" id="go-import">내 카톡 대화 가져오기</button>
       <button class="btn wide" id="go-resume">이어서 하기</button>
-      <button class="btn ghost wide" id="home-sample">샘플로 먼저 구경하기</button>
-      <button class="btn ghost wide" id="go-settings">설정</button>
-      <div class="note warn hide" id="home-note"><b>이 링크에는 번역 서버가 연결돼 있지 않습니다.</b> 샘플 대화로는 전 과정이 그대로 돌아가고, 내 카톡을 넣으려면 설정에 본인 Anthropic API 키를 넣어야 합니다.</div>
-      <div class="note"><b>대화는 이 기기 안에서 읽습니다.</b> 파일은 어디에도 업로드되지 않고, 영어로 옮기는 동안 그 날 대화만 전송됩니다.</div>
+      <button class="btn ghost wide" id="home-sample">샘플로 먼저 보기</button>
+      <div class="note warn hide" id="home-note"><b>번역 서버가 연결돼 있지 않습니다.</b> 샘플로는 전 과정을 써 볼 수 있고, 내 카톡은 설정에서 API 키를 넣으면 됩니다.</div>
+      <p class="fine">대화는 이 기기 안에서 읽고, 영어로 옮길 때만 그 날 대화를 보냅니다.</p>
     </div>
   </section>
 
@@ -66,7 +68,7 @@
         <textarea id="paste" placeholder="또는 여기에 대화 내용을 붙여넣으세요"></textarea>
         <button class="btn wide" id="go-parse" disabled>읽어들이기</button>
         <p class="small" id="import-err" role="status"></p>
-        <button class="btn ghost wide" id="go-sample">샘플로 먼저 구경하기</button>
+        <button class="btn ghost wide" id="go-sample">샘플로 먼저 보기</button>
       </div>
     </div>
   </section>
