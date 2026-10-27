@@ -106,7 +106,7 @@ function refreshHome() {
 
   if (!has) return;
   const remaining = state.days.filter((d) => dayStatus(d) !== 'done').length;
-  $('go-resume').textContent = remaining ? `이어서 하기 · ${remaining}일 남음` : `복습하기 · ${state.days.length}일치`;
+  $('go-resume').textContent = remaining ? `이어서 하기 (${remaining}일 남음)` : `복습하기 (${state.days.length}일치)`;
 }
 
 /* ══════ import ══════ */
@@ -198,15 +198,19 @@ const dayStatus = (d) =>
 function renderDays() {
   const total = state.days.reduce((a, d) => a + (d.cards.length || 0), 0);
   const finished = state.days.filter((d) => dayStatus(d) === 'done').length;
-  $('days-sub').textContent = `${state.days.length}일치 · 카드 ${total}개 · 완료 ${finished}일`;
+  $('days-sub').textContent = `${state.days.length}일치 대화, 카드 ${total}개, ${finished}일 끝냄`;
 
   $('day-list').innerHTML = state.days.map((d, i) => {
     const st = dayStatus(d);
     const label = st === 'done' ? '완료' : st === 'ready' ? '이어서' : '아직 안 옮김';
     const n = d.built ? `${d.cards.length}장` : `${d.messages.length}줄`;
+    // The day of the month leads, large: a list of dates is scanned by date,
+    // the way a calendar is, and the year is the same on every row.
+    const [, y, mo, dd] = d.date.match(/(\d{4})년 (\d{1,2})월 (\d{1,2})일/) || [];
+    const wd = y ? '일월화수목금토'[new Date(+y, mo - 1, +dd).getDay()] + '요일' : '';
     return `<button class="day ${st}" data-i="${i}">
-      <i class="pip"></i>
-      <span class="when"><b>${esc(d.date)}</b><span>${label}</span></span>
+      <span class="dd" aria-hidden="true">${dd || ''}</span>
+      <span class="when"><b>${y ? `${mo}월 ${dd}일 ${wd}` : esc(d.date)}</b><span>${label}</span></span>
       <span class="n">${n}</span>
     </button>`;
   }).join('');
@@ -237,7 +241,7 @@ async function build(day) {
   $('build-back').classList.add('hide');
   $('build-spin').classList.remove('hide');
   $('build-title').textContent = '영어로 옮기는 중';
-  $('build-sub').textContent = `${day.date} · ${day.messages.length}줄`;
+  $('build-sub').textContent = `${day.date}, ${day.messages.length}줄`;
   $('build-bar').style.width = '0%';
   $('build-count').textContent = '';
 
@@ -310,7 +314,7 @@ async function build(day) {
 function renderTranscript() {
   const day = state.days[activeDay];
   $('tx-title').textContent = day.date;
-  $('tx-sub').textContent = state.roomTitle ? `${state.roomTitle} · ${day.messages.length}줄` : `${day.messages.length}줄`;
+  $('tx-sub').textContent = state.roomTitle ? `${state.roomTitle} 대화 ${day.messages.length}줄` : `대화 ${day.messages.length}줄`;
 
   // Which name is mine is the one thing the app cannot work out for itself, so
   // it asks — but only until it has an answer. After that the question collapses

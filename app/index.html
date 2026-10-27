@@ -14,7 +14,7 @@
 <title>K-직장인 영어</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
 <link rel="stylesheet" href="styles.css">
 
 <div id="app">
@@ -23,6 +23,14 @@
   <section class="screen on" id="s-home">
     <div class="masthead">
       <div class="wordmark"><i class="dot"></i><span>K-직장인 영어</span></div>
+      <!-- The product in one glance: yesterday's question in English, my own
+           answer in Korean, and the gap where my English goes. That gap is
+           the whole app, so it is the one loud thing on the screen. -->
+      <figure class="hero-chat" aria-label="예시 대화: 팀장님의 영어 질문, 내가 한국어로 한 대답, 그리고 영어로 채울 내 차례">
+        <p class="hc them"><span class="who">박팀장</span>Sejin, where did that deploy end up yesterday?</p>
+        <p class="hc mine">지금 QA 돌리고 있습니다</p>
+        <p class="hc turn" aria-hidden="true">영어로 말할 차례</p>
+      </figure>
       <h1>어제 단톡방을<br>영어로 읽고, 말해보기</h1>
       <p class="small">카톡 대화를 통째로 영어로 옮깁니다. 그 중 <b>내가 한 말</b>만 골라 카드로 연습합니다 — 교재 문장이 아니라 내가 진짜 쓴 말로.</p>
     </div>
