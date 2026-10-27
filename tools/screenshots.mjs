@@ -23,6 +23,9 @@ const OUT = process.argv[2] || join(fileURLToPath(new URL('.', import.meta.url))
 const SIZES = [
   { name: 'ios-6.7', width: 430, height: 932, scale: 3 },    // 1290 × 2796
   { name: 'android', width: 360, height: 640, scale: 3 },    // 1080 × 1920
+  // Play's large-screen slot (tablets, an unfolded Fold): 16:9 landscape, so
+  // the two-pane transcript is what a big-screen shopper sees.
+  { name: 'android-tablet', width: 1280, height: 720, scale: 2 }, // 2560 × 1440
 ];
 
 const TYPES = {

@@ -5,15 +5,28 @@ name: Build release bundle
 # the console, so this is the workflow that actually produces something
 # uploadable.
 #
-# Manual only. A release is something you decide to cut, not something a push
-# decides for you — and the signing key should be touched as rarely as possible.
+# Two ways in, both deliberate: the Run workflow button, or pushing a tag like
+# v1.0.1. An ordinary push never releases — cutting a release is a decision,
+# and the signing key should be touched as rarely as possible.
+#
+# With PLAY_SERVICE_ACCOUNT_JSON set, the bundle goes straight to Play. Without
+# it the bundle is left as an artifact to upload by hand — which the very first
+# upload has to be anyway, because Play's API cannot publish to an app that has
+# never had a release.
 on:
+  push:
+    tags: ['v*']
   workflow_dispatch:
     inputs:
+      upload_to:
+        description: '빌드 후 Play 어디에 올릴까 (서비스 계정 시크릿이 있을 때만)'
+        type: choice
+        options: [alpha, production, none]
+        default: alpha
       version_code:
-        description: 'versionCode — 올릴 때마다 반드시 커져야 합니다. 첫 업로드는 1'
+        description: 'versionCode — 비워 두면 자동 (실행 번호). 직접 넣을 일은 거의 없습니다'
         type: string
-        default: '1'
+        default: ''
       throwaway_key:
         description: '시크릿 없이 빌드 경로만 확인 (나오는 AAB는 업로드 불가)'
         type: boolean
@@ -36,17 +49,30 @@ jobs:
           # "tools", which Google removed, and sdkmanager exits 1 on the miss.
           packages: 'platform-tools platforms;android-36 build-tools;36.0.0'
 
-      # gradle would fail on a non-number too, but forty lines into a stack
-      # trace. Play also wants it to go up every time, which only a person can
-      # check — so the message says so.
-      - name: Check the version code is a number
+      # Play refuses a versionCode it has seen, so by default it is this
+      # workflow's run number: it only ever goes up, and nobody has to remember
+      # the last one. A typed value still wins, for the rare repair.
+      #
+      # The name a person sees comes from the tag (v1.2.0 → 1.2.0) when there
+      # is one. Inputs are empty on a tag push, which is what the fallbacks
+      # here and below lean on.
+      - name: Pick the version
         env:
-          VC: ${{ inputs.version_code }}
+          TYPED: ${{ inputs.version_code }}
+          RUN: ${{ github.run_number }}
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
+          VC="${TYPED:-$RUN}"
           if ! [[ "$VC" =~ ^[1-9][0-9]{0,8}$ ]]; then
-            echo "::error::version_code 는 1 이상의 정수여야 합니다 (받은 값: '$VC'). 지난번에 올린 값보다 크게 넣으세요."
+            echo "::error::version_code 는 1 이상의 정수여야 합니다 (받은 값: '$VC'). 비워 두면 자동으로 정해집니다."
             exit 1
           fi
+          VN="1.0"
+          if [ "$REF_TYPE" = tag ]; then VN="${REF_NAME#v}"; fi
+          echo "VERSION_CODE=$VC" >> "$GITHUB_ENV"
+          echo "VERSION_NAME=$VN" >> "$GITHUB_ENV"
+          echo "versionCode $VC, versionName $VN"
 
       # Unlike the proxy's deploy, a missing setting here is always an error:
       # nobody runs this by accident, so being asked for a release without a key
@@ -114,7 +140,8 @@ jobs:
       - name: Assemble the signed bundle
         working-directory: android
         env:
-          ANDROID_VERSION_CODE: ${{ inputs.version_code }}
+          ANDROID_VERSION_CODE: ${{ env.VERSION_CODE }}
+          ANDROID_VERSION_NAME: ${{ env.VERSION_NAME }}
           ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/upload.jks
           ANDROID_KEYSTORE_PASSWORD: ${{ inputs.throwaway_key && 'throwaway' || secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ inputs.throwaway_key && 'throwaway' || secrets.ANDROID_KEY_ALIAS }}
@@ -141,7 +168,7 @@ jobs:
       # last text form of what goes into the bundle, so read it there.
       - name: Check the version code made it in
         env:
-          VC: ${{ inputs.version_code }}
+          VC: ${{ env.VERSION_CODE }}
         run: |
           manifest=$(find android/app/build/intermediates -path '*release*' -name AndroidManifest.xml -exec grep -l 'versionCode' {} + | head -1)
           if [ -z "$manifest" ]; then
@@ -165,9 +192,44 @@ jobs:
         if: always()
         run: rm -f "$RUNNER_TEMP/upload.jks"
 
-      - name: What to do next
+      # Same three outcomes as the proxy deploy: nothing asked, upload; asked
+      # but no service account yet, say how to finish by hand and stay green —
+      # that is the normal state until the first manual upload is done. A
+      # throwaway-signed bundle never gets this far, whatever was asked.
+      - name: Decide whether to upload
+        id: up
+        if: ${{ !inputs.throwaway_key }}
+        env:
+          SA: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          TRACK: ${{ inputs.upload_to || 'alpha' }}
+        run: |
+          if [ "$TRACK" = none ]; then
+            echo "upload=no" >> "$GITHUB_OUTPUT"
+            echo "업로드 안 함을 골랐습니다. Artifacts 의 AAB 를 직접 올리세요."
+          elif [ -z "$SA" ]; then
+            echo "upload=no" >> "$GITHUB_OUTPUT"
+            echo "::notice::PLAY_SERVICE_ACCOUNT_JSON 이 없어 자동 업로드를 건너뜁니다. Artifacts 의 AAB 를 Play Console 에 직접 올리세요 (store/auto-release.md)."
+          else
+            echo "upload=yes" >> "$GITHUB_OUTPUT"
+            echo "track=$TRACK" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload to Play
+        if: ${{ steps.up.outputs.upload == 'yes' }}
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.ksj11167.kofficeenglish
+          releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
+          track: ${{ steps.up.outputs.track }}
+          status: completed
+
+      - name: What happened
         if: ${{ !inputs.throwaway_key }}
         run: |
-          echo "versionCode ${{ inputs.version_code }} 로 만들었습니다."
-          echo "AAB 를 내려받아 Play Console → 테스트 → 비공개 테스트 에 올리세요."
-          echo "다음 실행에서는 version_code 를 더 큰 값으로 넣으세요 — 같은 값은 거부됩니다."
+          echo "versionCode $VERSION_CODE, versionName $VERSION_NAME 로 만들었습니다."
+          if [ "${{ steps.up.outputs.upload }}" = yes ]; then
+            echo "Play 의 ${{ steps.up.outputs.track }} 트랙에 올렸습니다. 검토가 끝나면 테스터/사용자에게 보입니다."
+          else
+            echo "AAB 를 내려받아 Play Console → 테스트 → 비공개 테스트 에 올리세요."
+          fi

@@ -84,7 +84,8 @@ GitHub 시크릿에는 파일을 못 넣으니 base64 한 줄로 바꾼다:
 
 **Actions → Build release bundle → Run workflow**
 
-`version_code`는 첫 업로드면 `1` 그대로 두면 된다.
+`version_code`는 비워 둔다 — 자동으로 정해진다. 올릴 곳은 첫 업로드면 아무거나
+(서비스 계정이 아직 없으니 어차피 업로드는 건너뛴다).
 
 끝나면 실행 화면 아래 **Artifacts**에 `k-office-english-release-aab`가 생긴다.
 내려받아 압축을 풀면 `app-release.aab`가 나온다.
@@ -114,16 +115,12 @@ Play Console → 테스트 → **비공개 테스트** 트랙. 내부 테스트�
 
 ## 다음 업로드부터
 
-**`version_code`를 더 큰 숫자로 넣고 실행한다.** Run workflow 창의 입력란이고,
-커밋할 필요가 없다. 같은 숫자는 Play가 거부한다.
+**그냥 다시 실행한다.** versionCode는 실행할 때마다 자동으로 커진다. 업로드까지
+자동으로 하려면 `store/auto-release.md`의 서비스 계정 설정을 한 번 해 둔다.
 
-```
-1 → 2 → 3 …   올리기만 하면 되고, 건너뛰어도 된다
-```
-
-사람이 읽는 `versionName`("1.0")은 `android/app/build.gradle`에 있고 아무 때나
-바꿔도 된다. 둘은 별개다 — 스토어에 보이는 건 `versionName`, Play가 중복을
-판단하는 건 `versionCode`다.
+스토어에 보이는 버전 이름(`1.0`)을 바꾸고 싶으면 `v1.0.1` 같은 태그로 실행한다 —
+둘은 별개다. 스토어에 보이는 건 versionName, Play가 중복을 판단하는 건
+versionCode다.
 
 ## 키를 잃어버렸다면
 

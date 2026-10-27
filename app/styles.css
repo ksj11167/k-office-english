@@ -293,7 +293,7 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
   background: var(--mine); color: var(--mine-ink); border: 1px solid var(--mine-line);
   border-radius: 18px; border-bottom-right-radius: 6px; padding: 14px 16px;
   font-size: 19px; line-height: 1.45; font-weight: 600;
-  white-space: pre-wrap; word-break: break-word; align-self: flex-end; max-width: 96%;
+  white-space: pre-wrap; word-break: keep-all; overflow-wrap: anywhere; align-self: flex-end; max-width: 96%;
 }
 
 /* Pushed to the bottom of the card: the sentence you are about to say sits
@@ -394,3 +394,92 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
 
 /* Quiet on purpose: it is there for the rare bad line, not as a call to action. */
 .tx-report { align-self: center; font-weight: 500; color: var(--muted); }
+
+/* ─────────── big screens: an unfolded foldable, a tablet, a desktop ───────────
+   The phone column is 480px, and on an unfolded Fold that leaves more than a
+   third of the screen empty on each side. Width alone decides the layout — not
+   a device list — so the same rules cover a Fold, a Flip, an iPad, a foldable
+   iPhone and a browser window being dragged narrower. Resizing never reloads:
+   Android keeps the activity through a fold (configChanges in the manifest)
+   and the page only reflows, so a half-finished deck survives the hinge. */
+@media (min-width: 720px) {
+  #app { max-width: 1040px; padding-inline: 28px; }
+
+  /* Most screens are a short form or a column of buttons. Stretched to 1000px
+     they read worse, not better, so they stay a comfortable column. */
+  .screen { width: 100%; max-width: 560px; margin-inline: auto; }
+  #s-practice { max-width: 660px; }
+
+  /* The two screens that are lists get the width. */
+  #s-days, #s-transcript { max-width: none; }
+  .days { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); align-content: start; }
+
+  /* The conversation on the left, everything you do with it on the right —
+     the controls stay in reach while the transcript scrolls. */
+  #s-transcript .stack {
+    display: grid; flex: 1; align-items: start;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    grid-template-rows: auto auto auto 1fr;
+    column-gap: 28px;
+  }
+  /* Its own scroll, so the controls beside it never scroll away with the page. */
+  #s-transcript #tx-body { grid-column: 1; grid-row: 1 / -1; align-self: stretch; max-height: calc(100dvh - 110px); }
+  #s-transcript #tx-sub, #s-transcript #tx-pick,
+  #s-transcript #go-practice, #s-transcript #tx-report { grid-column: 2; }
+  #s-transcript #tx-sub { grid-row: 1; }
+  #s-transcript #tx-pick { grid-row: 2; }
+  #s-transcript #go-practice { grid-row: 3; }
+  #s-transcript #tx-report { grid-row: 4; align-self: start; justify-self: center; }
+
+  .deck { height: min(60vh, 560px); }
+  /* A wider card read at arm's length: the type grows with it. */
+  .swipe-card { padding: 26px; }
+  .ctx .bub { font-size: 15.5px; }
+  .target { font-size: 23px; }
+  .en { font-size: 30px; }
+}
+
+/* Half-folded, hinge running top to bottom (a Fold held like a book, or any
+   dual-screen device). The hinge is a seam that eats pixels, so nothing may
+   sit across it: each pane takes exactly one side, and the gap between them is
+   the hinge itself. Where the browser cannot report segments these rules never
+   apply and the width rules above are what you get. */
+@media (horizontal-viewport-segments: 2) {
+  #app { max-width: none; padding-inline: 0; }
+  .screen { max-width: env(viewport-segment-width 0 0); margin-inline: 0; padding-inline: 20px; }
+  #s-days, #s-transcript { max-width: none; padding-inline: 0; }
+  #s-transcript .topbar, #s-days .topbar { padding-inline: 20px; }
+  #s-transcript .stack {
+    grid-template-columns: env(viewport-segment-width 0 0) env(viewport-segment-width 1 0);
+    column-gap: calc(env(viewport-segment-left 1 0) - env(viewport-segment-right 0 0));
+  }
+  #s-transcript #tx-body { padding-inline: 20px; }
+  #s-transcript #tx-sub, #s-transcript #tx-pick, #s-transcript #go-practice { width: auto; margin-inline: 20px; }
+  .days { padding-inline: 20px; }
+
+  /* A card is one thing to read, so it must not be split by the hinge: it
+     takes the left side whole, and the controls take the right. */
+  #s-practice { max-width: none; padding-inline: 0; }
+  #s-practice.on {
+    display: grid;
+    grid-template-columns: env(viewport-segment-width 0 0) env(viewport-segment-width 1 0);
+    grid-template-rows: auto 1fr auto auto;
+    column-gap: calc(env(viewport-segment-left 1 0) - env(viewport-segment-right 0 0));
+  }
+  #s-practice .deck { grid-column: 1; grid-row: 1 / -1; align-self: center; margin: 20px; height: min(82vh, 640px); }
+  #s-practice .pr-head, #s-practice .hint, #s-practice .dock { grid-column: 2; padding-inline: 20px; }
+  #s-practice .pr-head { grid-row: 1; }
+  #s-practice .hint { grid-row: 3; }
+  #s-practice .dock { grid-row: 4; padding-bottom: 32px; }
+}
+
+/* Half-folded, hinge running left to right (a Fold or Flip propped open on a
+   table). The card goes on the top half where it is read; the buttons go on
+   the bottom half, which is the half lying flat under the thumb. */
+@media (vertical-viewport-segments: 2) {
+  #s-practice .deck {
+    height: calc(env(viewport-segment-height 0 0) - 76px); min-height: 0;
+    margin: 0 0 calc(env(viewport-segment-top 0 1) - env(viewport-segment-bottom 0 0) + 16px);
+  }
+  #s-practice .hint { padding-top: 8px; }
+}

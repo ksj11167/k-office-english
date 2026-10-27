@@ -137,6 +137,20 @@ try {
     assert(href.startsWith('mailto:ksj11167@gmail.com'), 'report goes nowhere: ' + href);
   });
 
+  // An unfolded Fold is about 880px wide. Unfolding is a resize, not a reload,
+  // so this resizes the page it is already on — the same thing the phone does.
+  await step('unfolded, the transcript and its controls sit side by side', async () => {
+    await page.setViewportSize({ width: 884, height: 1000 });
+    const body = await page.locator('#tx-body').boundingBox();
+    const go = await page.locator('#go-practice').boundingBox();
+    assert(go.x >= body.x + body.width, `controls are not beside the transcript (${go.x} vs ${body.x + body.width})`);
+    assert(go.x + go.width <= 884, 'the controls run off the screen');
+    await page.setViewportSize({ width: 390, height: 844 });
+    const narrow = await page.locator('#go-practice').boundingBox();
+    assert(narrow.width > 300, 'folding back did not return to the phone column');
+    assert(await screenId() === 's-transcript', 'the resize lost the screen');
+  });
+
   await step('practice is blocked until I say which speaker is me', async () => {
     assert(await page.locator('#go-practice').isDisabled(), 'practice offered before picking me');
     const label = await page.locator('#go-practice').innerText();
