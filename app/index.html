@@ -42,7 +42,8 @@
       <button class="btn wide" id="go-import">내 카톡 대화 가져오기</button>
       <button class="btn wide" id="go-resume">이어서 하기</button>
       <button class="btn ghost wide" id="home-sample">샘플로 먼저 보기</button>
-      <div class="note warn hide" id="home-note"><b>번역 서버가 연결돼 있지 않습니다.</b> 샘플로는 전 과정을 써 볼 수 있고, 내 카톡은 설정에서 API 키를 넣으면 됩니다.</div>
+      <button class="btn ghost wide" id="go-jobs">직무별 표현으로 연습하기</button>
+      <div class="note warn hide" id="home-note"><b>번역 서버가 연결돼 있지 않습니다.</b> 샘플과 직무별 표현은 그대로 쓸 수 있고, 내 카톡은 설정에서 API 키를 넣으면 됩니다.</div>
       <p class="fine">대화는 이 기기 안에서 읽고, 영어로 옮길 때만 그 날 대화를 보냅니다.</p>
     </div>
   </section>
@@ -117,6 +118,18 @@
     </div>
   </section>
 
+  <!-- ══════ JOB DECKS — 번역 없이 바로 쓰는 직무별 표현 ══════ -->
+  <section class="screen" id="s-jobs">
+    <div class="topbar">
+      <button class="iconbtn" id="back-jobs" aria-label="뒤로"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <h2>직무별 표현</h2>
+    </div>
+    <div class="stack" style="gap:16px; min-height:0">
+      <p class="small" id="jobs-sub">회사에서 매일 쓰는 말 200장. 내 카톡 없이도 바로 연습할 수 있습니다.</p>
+      <div class="days" id="job-list"></div>
+    </div>
+  </section>
+
   <!-- ══════ TRANSCRIPT — 영어로 옮겨진 대화 ══════ -->
   <section class="screen" id="s-transcript">
     <div class="topbar">
@@ -175,6 +188,7 @@
         <button class="btn ghost wide" id="see-transcript">이 날 영어 대화록 다시 보기</button>
         <button class="btn ghost wide" id="pick-day">날짜 목록</button>
         <button class="btn ghost wide" id="restart">다른 대화 넣기</button>
+        <button class="btn ghost wide hide" id="more-jobs">다른 직무 고르기</button>
       </div>
     </div>
   </section>

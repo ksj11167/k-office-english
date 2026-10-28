@@ -269,6 +269,46 @@ try {
     assert(!page.url().includes('shared=1'), 'the query string survived, so a reload would re-import');
   });
 
+  // Job decks are the one path that needs no translation server, which is
+  // exactly the state this test runs in.
+  await step('job decks open from home and run with no translation server', async () => {
+    await page.goto(base);
+    await page.waitForSelector('#s-home.on');
+    await page.click('#go-jobs');
+    await page.waitForSelector('#s-jobs.on');
+    const names = await page.locator('#job-list .day .when b').allTextContents();
+    assert(names.length === 5, 'expected 5 job decks, got ' + names.length);
+    assert(names.includes('개발'), 'the dev deck is missing: ' + names.join(','));
+    await page.click('#job-list .day[data-job="dev"]');
+    await page.waitForSelector('#s-practice.on');
+    assert(await page.locator('#pr-count').innerText() === '0/10', 'a job session is not ten cards');
+    const target = await page.locator('.swipe-card.front .target').innerText();
+    assert(target.trim().length > 0, 'the card has no Korean line');
+  });
+
+  await step('a job deck keeps its progress and offers ten more', async () => {
+    for (let n = 0; n < 10; n++) {
+      const before = await page.locator('#pr-count').innerText();
+      await page.click('#sw-yes');
+      await page.waitForFunction((b) => document.getElementById('s-done').classList.contains('on')
+        || document.getElementById('pr-count').textContent !== b, before);
+    }
+    await page.waitForSelector('#s-done.on');
+    assert((await page.locator('#done-eyebrow').innerText()) === '개발', 'done screen does not name the deck');
+    assert(await page.locator('#more-jobs').isVisible(), 'no way back to the other decks');
+    assert(!(await page.locator('#see-transcript').isVisible()), 'a job deck offered a transcript it does not have');
+    await page.click('#more-jobs');
+    await page.waitForSelector('#s-jobs.on');
+    const dev = await page.locator('#job-list .day[data-job="dev"]').innerText();
+    assert(dev.includes('익힘') || dev.includes('개발'), 'deck row lost its progress: ' + dev);
+    await page.reload();
+    await page.waitForSelector('#s-home.on');
+    await page.click('#go-jobs');
+    await page.click('#job-list .day[data-job="dev"]');
+    await page.waitForSelector('#s-practice.on');
+    assert(await page.locator('#pr-count').innerText() === '0/10', 'the second session is not ten cards');
+  });
+
   await step('no script errors anywhere in the walk', async () => {
     assert(errors.length === 0, errors.join(' | '));
   });

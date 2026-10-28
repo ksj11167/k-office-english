@@ -30,6 +30,7 @@ const SHELL = [
   './js/srs.js',
   './js/swipe.js',
   './js/translate.js',
+  './js/job-decks.js',
   './js/platform.js',
   './vendor/ts-fsrs.mjs',
   './icons/icon-192.png',

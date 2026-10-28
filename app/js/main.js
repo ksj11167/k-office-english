@@ -2,6 +2,7 @@ import { parseKakaoExport, groupByDay, cardsForSpeaker, speakersIn, guessRoomTyp
 import { newCardState, review, isDue, isLearned, dueLabel } from './srs.js';
 import { createSwipeDeck } from './swipe.js';
 import * as T from './translate.js';
+import { JOB_DECKS } from './job-decks.js';
 import { isNative, platform, onSharedChatExport, createRecogniser, createSpeaker } from './platform.js';
 
 /* The sample ships with English written in, so the whole loop — the transcript,
@@ -56,9 +57,11 @@ const STORE = 'rte.v4';
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-let state = { me: null, roomTitle: null, days: [], usingSample: false };
+let state = { me: null, roomTitle: null, days: [], usingSample: false, jobs: {} };
 let parsed = null;
 let activeDay = null;
+// Set while practising a job deck instead of a day of my own chat.
+let activeJob = null;
 let deck = null;
 let sessionDone = 0;
 let sessionTotal = 0;
@@ -85,6 +88,7 @@ function load() {
 $('go-import').addEventListener('click', () => show('import'));
 $('go-resume').addEventListener('click', () => { renderDays(); show('days'); });
 $('home-sample').addEventListener('click', () => ingest(SAMPLE_TXT, true));
+$('go-jobs').addEventListener('click', () => { renderJobs(); show('jobs'); });
 
 /* The home screen has to tell the truth about what this copy of the app can
    do. On a build with no translation provider — the public link, before the
@@ -309,6 +313,76 @@ async function build(day) {
   renderTranscript();
 }
 
+/* ══════ job decks ══════ */
+/* Written cards for common office situations, shipped with the app (D26
+   reverses D20). They are the one thing that works with no translation
+   server at all, so a tester or a reviewer who never imports a chat still has
+   something real to practise. Each deck keeps its own FSRS state, separate
+   from the days of my chat: the two are different sources, and a job card is
+   never mixed into a day's transcript. */
+const JOB_SESSION = 10;
+
+function jobDeck(id) {
+  const src = JOB_DECKS.find((d) => d.id === id);
+  if (!state.jobs) state.jobs = {};
+  const kept = new Map(((state.jobs[id] && state.jobs[id].cards) || []).map((c) => [c.id, c.srs]));
+  // Rebuilt from the shipped data every time, so a corrected sentence in a new
+  // version reaches people who already started the deck, with their progress.
+  state.jobs[id] = {
+    cards: src.cards.map((c, i) => ({
+      id: `${id}:${i}`, ko: c.ko, en: c.en, situation: c.situation,
+      context: (c.context || []).map((x) => ({ speaker: x.speaker, ko: x.text })),
+      srs: kept.get(`${id}:${i}`) || newCardState(),
+    })),
+  };
+  return state.jobs[id];
+}
+
+function jobProgress(id) {
+  const cards = (state.jobs && state.jobs[id] && state.jobs[id].cards) || [];
+  const learned = cards.filter((c) => isLearned(c.srs)).length;
+  const started = cards.some((c) => c.srs.reps > 0);
+  return { learned, started };
+}
+
+function renderJobs() {
+  $('job-list').innerHTML = JOB_DECKS.map((d) => {
+    const { learned, started } = jobProgress(d.id);
+    const st = learned === d.cards.length ? 'done' : started ? 'ready' : 'new';
+    const label = st === 'done' ? '다 익힘' : started ? `${learned}장 익힘` : d.blurb;
+    return `<button class="day ${st}" data-job="${esc(d.id)}">
+      <span class="when"><b>${esc(d.name)}</b><span>${esc(label)}</span></span>
+      <span class="n">${d.cards.length}장</span>
+    </button>`;
+  }).join('');
+  for (const b of $('job-list').querySelectorAll('.day')) {
+    b.addEventListener('click', () => startJob(b.dataset.job));
+  }
+}
+
+$('back-jobs').addEventListener('click', () => { refreshHome(); show('home'); });
+
+/** Ten at a time: what FSRS says is due first, then cards not seen yet. */
+function startJob(id) {
+  const deckState = jobDeck(id);
+  activeJob = id;
+  activeDay = null;
+  const due = [], fresh = [];
+  deckState.cards.forEach((c, i) => {
+    if (c.srs.reps === 0) fresh.push({ job: id, i, review: false });
+    else if (isDue(c.srs)) due.push({ job: id, i, review: true });
+  });
+  const items = [...due, ...fresh].slice(0, JOB_SESSION);
+  save();
+  if (!items.length) { sessionDone = 0; finish(); return; }
+  sessionTotal = items.length;
+  sessionDone = 0;
+  show('practice');
+  deck.load(items);
+  updateProgress();
+  deck.focus();
+}
+
 /* ══════ transcript — the conversation, in English ══════ */
 /* This is the app's first feature standing on its own: yesterday's group chat,
    readable end to end in English. It is also where I say which one is me, which
@@ -387,6 +461,7 @@ $('go-practice').addEventListener('click', () => {
 deck = createSwipeDeck($('deck'), { render: renderCard, onSwipe, onEmpty: finish });
 
 function startSession() {
+  activeJob = null;
   const day = state.days[activeDay];
   const main = day.cards.map((_, i) => ({ d: activeDay, i, review: false }));
 
@@ -407,7 +482,7 @@ function startSession() {
   deck.focus();
 }
 
-const cardAt = (ref) => state.days[ref.d].cards[ref.i];
+const cardAt = (ref) => (ref.job ? state.jobs[ref.job].cards[ref.i] : state.days[ref.d].cards[ref.i]);
 
 function renderCard(body, ref) {
   const c = cardAt(ref);
@@ -493,6 +568,9 @@ function finish() {
   stopListening();
   speaker.stop();
   save();
+  if (activeJob) return finishJob();
+  for (const id of ['see-transcript', 'pick-day', 'restart']) $(id).classList.remove('hide');
+  $('more-jobs').classList.add('hide');
   const day = state.days[activeDay];
   const left = state.days.findIndex((d, i) => i !== activeDay && dayStatus(d) !== 'done');
   const learned = day && day.cards ? day.cards.filter((c) => isLearned(c.srs)).length : 0;
@@ -518,6 +596,31 @@ function finish() {
   show('done');
 }
 
+function finishJob() {
+  const src = JOB_DECKS.find((d) => d.id === activeJob);
+  const cards = state.jobs[activeJob].cards;
+  const learned = cards.filter((c) => isLearned(c.srs)).length;
+  const waiting = cards.filter((c) => c.srs.reps === 0 || isDue(c.srs)).length;
+
+  $('done-eyebrow').textContent = src.name;
+  $('done-title').textContent = sessionDone > 0 ? '10장 끝' : waiting ? '세션 종료' : '지금은 복습할 카드가 없습니다';
+  $('done-stats').innerHTML = [
+    ['외운 카드', sessionDone],
+    ['이 덱 익힘', `${learned}/${cards.length}`],
+  ].map(([k, v]) => `<div class="stat"><b>${v}</b><span>${k}</span></div>`).join('');
+  $('done-sub').textContent = waiting
+    ? '왼쪽으로 넘긴 카드는 더 자주 돌아옵니다.'
+    : `다음 복습은 ${dueLabel(cards[0].srs)}. 다른 직무도 해 보세요.`;
+
+  $('next-day').classList.toggle('hide', !waiting);
+  $('next-day').textContent = '10장 더 하기';
+  $('next-day').onclick = () => startJob(activeJob);
+  for (const id of ['see-transcript', 'pick-day', 'restart']) $(id).classList.add('hide');
+  $('more-jobs').classList.remove('hide');
+  show('done');
+}
+
+$('more-jobs').addEventListener('click', () => { renderJobs(); show('jobs'); });
 $('see-transcript').addEventListener('click', () => renderTranscript());
 $('pick-day').addEventListener('click', () => { renderDays(); show('days'); });
 $('restart').addEventListener('click', () => { paste.value = ''; $('go-parse').disabled = true; show('import'); });
@@ -605,9 +708,10 @@ function openSettings() {
   $('model').innerHTML = T.MODELS
     .map((m) => `<option value="${m.id}" ${m.id === T.getModel() ? 'selected' : ''}>${m.label}</option>`).join('');
   const cards = state.days.reduce((a, d) => a + (d.cards.length || 0), 0);
-  $('data-state').textContent = state.days.length
+  const jobsStarted = JOB_DECKS.filter((d) => jobProgress(d.id).started).length;
+  $('data-state').textContent = (state.days.length
     ? `${state.days.length}일치 대화와 카드 ${cards}개가 이 브라우저에 저장돼 있습니다.`
-    : '저장된 대화가 없습니다.';
+    : '저장된 대화가 없습니다.') + (jobsStarted ? ` 직무별 표현 ${jobsStarted}개 덱의 진도도 있습니다.` : '');
   show('settings');
 }
 
@@ -619,7 +723,7 @@ $('save-key').addEventListener('click', () => {
 
 $('wipe').addEventListener('click', () => {
   if (!confirm('저장된 대화와 진도를 모두 지웁니다. 되돌릴 수 없습니다.')) return;
-  state = { me: null, roomTitle: null, days: [], usingSample: false };
+  state = { me: null, roomTitle: null, days: [], usingSample: false, jobs: {} };
   try { localStorage.removeItem(STORE); } catch { /* private mode */ }
   parsed = null;
   refreshHome();
