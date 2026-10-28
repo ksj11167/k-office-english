@@ -36,8 +36,10 @@ bash make-upload-key.sh
 - 2번에 넣을 **시크릿 4개의 이름과 값**을 화면에 그대로 찍어 준다
 - 키가 이미 있으면 덮어쓰지 않고 멈춘다
 
-**`keytool`이 없다고 나오면** Java(JDK)를 먼저 깐다. macOS는 `brew install openjdk`,
-Windows는 https://adoptium.net 에서 Temurin JDK를 깔고 **Git Bash**에서 실행한다.
+**`keytool`이 없다고 나오면** Java(JDK)를 먼저 깐다. Mac·Windows 모두
+https://adoptium.net 에서 Temurin JDK 설치 파일(Mac은 .pkg, Windows는 .msi)을 받는다.
+Windows는 설치 중 "Add to PATH"를 켜고 **Git Bash**에서 실행한다. Mac에서
+`brew install openjdk`만 하면 keytool이 경로에 잡히지 않으니 쓰지 않는다.
 
 **화면에 나온 비밀번호와 `upload.jks` 파일을 비밀번호 관리자(또는 안전한 곳)에
 보관한다.** 이 문서에서 가장 중요한 한 줄이다. 저장소에는 절대 넣지 않는다.

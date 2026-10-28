@@ -8,9 +8,11 @@
 #
 #   bash tools/make-upload-key.sh
 #
-# Needs `keytool`, which comes with any Java (JDK). macOS: `brew install
-# openjdk`. Windows: run this from Git Bash after installing a JDK from
-# https://adoptium.net.
+# Needs `keytool`, which comes with any Java (JDK). Install Temurin from
+# https://adoptium.net on either system. On macOS its .pkg puts the JDK where
+# /usr/bin/keytool finds it; Homebrew's openjdk is keg-only and does not, so
+# `brew install openjdk` alone still leaves keytool missing. On Windows, run
+# this from Git Bash, and tick "Add to PATH" in the installer.
 set -euo pipefail
 
 DIR="$HOME/k-office-english-upload-key"
@@ -19,8 +21,9 @@ ALIAS="upload"
 
 if ! command -v keytool >/dev/null 2>&1; then
   echo "keytool 을 찾을 수 없습니다. Java(JDK)를 먼저 설치하세요."
-  echo "  macOS:   brew install openjdk"
-  echo "  Windows: https://adoptium.net 에서 Temurin JDK 설치 후 Git Bash 에서 다시 실행"
+  echo "  https://adoptium.net 에서 Temurin JDK 를 내려받아 설치하세요 (Mac 은 .pkg, Windows 는 .msi)."
+  echo "  Windows 는 설치 중 \"Add to PATH\" 를 켜고, 설치 후 Git Bash 를 새로 열어 다시 실행하세요."
+  echo "  Mac 에서 brew install openjdk 만으로는 keytool 이 잡히지 않습니다."
   exit 1
 fi
 
