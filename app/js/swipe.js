@@ -34,7 +34,7 @@ export function createSwipeDeck(root, { render, onSwipe, onEmpty }) {
       const el = document.createElement('article');
       el.className = 'swipe-card';
       el.innerHTML =
-        '<div class="verdict yes" aria-hidden="true">통과</div>' +
+        '<div class="verdict yes" aria-hidden="true">결재</div>' +
         '<div class="verdict no" aria-hidden="true">반려</div>' +
         '<div class="swipe-body"></div>';
       root.append(el);

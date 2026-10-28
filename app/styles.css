@@ -3,7 +3,7 @@
    without thinking: the internal document. A form with ruled rows and grey
    label cells, a navy rule under the title, a serif heading like a printed
    memo, and a red seal for approval. Practising a sentence is getting it
-   approved: 통과 (it passes) or 반려 (sent back). My own lines are marked the
+   approved: 결재 (signed off) or 반려 (sent back). My own lines are marked the
    way people mark a printout, with a yellow highlighter.
 
    Nothing here is decoration for its own sake: every rule separates two
@@ -26,7 +26,7 @@
   --accent-ink: #ffffff;
   --accent-soft: #e9edf5;
 
-  --seal: #c4352a;        /* 인주 red: only for approval stamps and the 통과/반려 controls */
+  --seal: #c4352a;        /* 인주 red: only for approval stamps and the 결재/반려 controls */
   --seal-ink: #ffffff;
   --seal-soft: #fbe9e6;
 
@@ -412,7 +412,7 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
 }
 .flip:active { background: var(--accent-soft); }
 
-/* dock: 반려 / 말하기 / 통과 — words, not just icons, because the words are
+/* dock: 반려 / 말하기 / 결재 — words, not just icons, because the words are
    the grading. */
 .dock {
   display: grid; grid-template-columns: 1fr 1.25fr 1fr; gap: 10px;

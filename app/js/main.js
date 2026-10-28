@@ -524,7 +524,7 @@ function revealIn(body) {
   body.querySelector('.answer').classList.remove('hide');
   const flip = body.querySelector('.flip');
   if (flip) flip.remove();
-  $('pr-hint').textContent = '말할 수 있었으면 통과, 아니면 반려';
+  $('pr-hint').textContent = '말할 수 있었으면 결재, 아니면 반려';
   // Hearing it is most of the point of revealing it, so it plays without asking.
   // The button is still there to hear it again.
   const say = body.querySelector('.say');
@@ -553,7 +553,7 @@ function onSwipe(ref, dir) {
   save();
   updateProgress();
   $('pr-hint').textContent = deck.remaining() > 0
-    ? '말해 보고 정답을 확인한 뒤, 말할 수 있었으면 통과'
+    ? '말해 보고 정답을 확인한 뒤, 말할 수 있었으면 결재'
     : '';
 }
 
@@ -582,7 +582,7 @@ function finish() {
   $('done-title').textContent = sessionDone > 0 ? '오늘치 결재 완료' : '세션 종료';
   $('done-stamp').classList.toggle('hide', sessionDone === 0);
   $('done-stats').innerHTML = [
-    ['통과', sessionDone],
+    ['결재', sessionDone],
     ['이 날 익힘', learned],
     ['남은 날짜', state.days.filter((d) => dayStatus(d) !== 'done').length],
   ].map(([k, v]) => `<div class="stat"><b>${v}</b><span>${k}</span></div>`).join('');
@@ -610,7 +610,7 @@ function finishJob() {
   $('done-title').textContent = sessionDone > 0 ? '10장 결재 완료' : waiting ? '세션 종료' : '지금은 복습할 카드가 없습니다';
   $('done-stamp').classList.toggle('hide', sessionDone === 0);
   $('done-stats').innerHTML = [
-    ['통과', sessionDone],
+    ['결재', sessionDone],
     ['이 덱 익힘', `${learned}/${cards.length}`],
   ].map(([k, v]) => `<div class="stat"><b>${v}</b><span>${k}</span></div>`).join('');
   $('done-sub').textContent = waiting
@@ -696,7 +696,7 @@ function judge() {
     mw.classList.remove('hide');
     mw.innerHTML = '빠진 말: ' + missed.slice(0, 8).map((w) => `<u>${esc(w)}</u>`).join(' ');
   }
-  $('pr-hint').textContent = pct >= 70 ? '통했습니다. 통과를 누르세요' : '아쉬우면 반려하고 다시 보세요';
+  $('pr-hint').textContent = pct >= 70 ? '통했습니다. 결재를 누르세요' : '아쉬우면 반려하고 다시 보세요';
 }
 
 /* ══════ settings ══════ */
