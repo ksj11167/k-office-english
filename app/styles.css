@@ -6,20 +6,22 @@
    approved: 결재 (signed off) or 반려 (sent back). My own lines are marked the
    way people mark a printout, with a yellow highlighter.
 
-   Nothing here is decoration for its own sake: every rule separates two
-   fields, every grey cell is a label, and the seal appears only when
-   something has actually been approved. Every text colour clears 4.5:1 on
+   Drawn the way a current e-approval app draws it rather than a printed form:
+   white sheets on a light desk, hairline rules, soft corners, heavy sans
+   headings. Every rule separates two fields, every small grey label names
+   the value beside it, and the seal appears only when something has actually
+   been signed off. Every text colour clears 4.5:1 on
    the surfaces it sits on, in both themes. */
 :root {
-  --ground: #f9f9f7;      /* paper: off-white and neutral, not cream */
-  --surface: #ffffff;     /* a sheet laid on the paper */
-  --surface-2: #eef0f4;   /* label cells and filled controls */
-  --surface-3: #e2e5eb;   /* the same, pressed */
+  --ground: #f4f5f7;      /* the desk: a light cool grey the sheets sit on */
+  --surface: #ffffff;     /* a sheet */
+  --surface-2: #f0f2f5;   /* filled controls and quiet slips */
+  --surface-3: #e4e7ec;   /* the same, pressed */
   --ink: #1a1d24;
   --ink-2: #474d59;
   --muted: #626875;       /* 5.3:1 on paper, 4.9:1 on label cells and on the highlighter */
-  --line: #d6d9df;        /* row rules inside a form */
-  --line-2: #b7bdc8;
+  --line: #e2e5ea;        /* hairlines: sheet edges and row rules */
+  --line-2: #c9ced6;
 
   --accent: #1f2d4f;      /* navy: rules, form frames, primary buttons */
   --accent-deep: #14203c;
@@ -44,20 +46,21 @@
   --no-text: #963309;
 
   --sans: "Noto Sans KR", system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-  --display: "Noto Serif KR", "Apple SD Gothic Neo", serif;
+  --display: var(--sans);
   --serif: "Newsreader", Georgia, "Times New Roman", serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --r-md: 6px;
-  --r-lg: 6px;
-  --frame: 1.5px solid var(--accent);
+  --r-md: 12px;
+  --r-lg: 16px;
+  --frame: 1px solid var(--line);
+  --sheet-shadow: 0 1px 2px rgba(26, 29, 36, .04), 0 8px 24px rgba(26, 29, 36, .05);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --ground: #15171c; --surface: #1d2027; --surface-2: #262a33; --surface-3: #303541;
+    --ground: #121419; --surface: #1c1f26; --surface-2: #252932; --surface-3: #2f343e;
     --ink: #eceef2; --ink-2: #b6bcc7; --muted: #8f96a3;
-    --line: #333844; --line-2: #4a5160;
+    --line: #2e333d; --line-2: #454c59;
     --accent: #b8c6e6; --accent-deep: #9fb1db; --accent-ink: #12182a; --accent-soft: #232a3a;
     --seal: #ff7a6b; --seal-ink: #15171c; --seal-soft: #3a1f1c;
     --mine: #3d3414; --mine-ink: #ffe48a; --mine-line: #5c4d1c;
@@ -68,9 +71,9 @@
   }
 }
 :root[data-theme="dark"] {
-  --ground: #15171c; --surface: #1d2027; --surface-2: #262a33; --surface-3: #303541;
+  --ground: #121419; --surface: #1c1f26; --surface-2: #252932; --surface-3: #2f343e;
   --ink: #eceef2; --ink-2: #b6bcc7; --muted: #8f96a3;
-  --line: #333844; --line-2: #4a5160;
+  --line: #2e333d; --line-2: #454c59;
   --accent: #b8c6e6; --accent-deep: #9fb1db; --accent-ink: #12182a; --accent-soft: #232a3a;
   --seal: #ff7a6b; --seal-ink: #15171c; --seal-soft: #3a1f1c;
   --mine: #3d3414; --mine-ink: #ffe48a; --mine-line: #5c4d1c;
@@ -107,10 +110,8 @@ body {
 .screen.on { display: flex; }
 .hide { display: none !important; }
 
-/* Headings are set like a printed memo: a heavy serif, tight. Body copy stays
-   sans, because it is read on a phone in motion. */
-h1 { font-family: var(--display); font-size: 31px; line-height: 1.28; font-weight: 900; letter-spacing: -.045em; margin: 0; text-wrap: balance; }
-h2 { font-family: var(--display); font-size: 19px; font-weight: 900; margin: 0; letter-spacing: -.035em; }
+h1 { font-family: var(--display); font-size: 30px; line-height: 1.3; font-weight: 900; letter-spacing: -.05em; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--display); font-size: 19px; font-weight: 800; margin: 0; letter-spacing: -.035em; }
 p { margin: 0; color: var(--ink-2); }
 .small { font-size: 14px; color: var(--muted); line-height: 1.6; }
 .eyebrow { font-size: 13px; font-weight: 700; color: var(--muted); }
@@ -122,7 +123,7 @@ p { margin: 0; color: var(--ink-2); }
 
 /* ─────────── buttons ─────────── */
 button { font-family: inherit; font-size: inherit; letter-spacing: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
-:focus-visible { outline: 3px solid var(--seal); outline-offset: 2px; border-radius: 4px; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
 
 .btn {
   text-decoration: none;
@@ -135,19 +136,19 @@ button { font-family: inherit; font-size: inherit; letter-spacing: inherit; curs
 .btn:active { background: var(--accent-deep); }
 .btn[disabled] { background: var(--surface-2); color: var(--muted); cursor: default; }
 .btn.wide { width: 100%; }
-.btn.ghost { background: var(--surface); color: var(--accent); box-shadow: inset 0 0 0 1.5px var(--accent); font-size: 16px; }
-.btn.ghost:active { background: var(--accent-soft); }
+.btn.ghost { background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line-2); font-size: 16px; font-weight: 600; }
+.btn.ghost:active { background: var(--surface-2); }
 
 .iconbtn {
   /* 48dp is Android's minimum target and over iOS's 44pt. */
-  width: 48px; height: 48px; border-radius: 4px; display: grid; place-items: center;
-  color: var(--accent); flex: none; margin-left: -12px;
+  width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center;
+  color: var(--ink); flex: none; margin-left: -12px;
 }
 .iconbtn:active { background: var(--surface-2); }
 
 /* ─────────── panels, forms ─────────── */
 .panel {
-  background: var(--surface); border: var(--frame);
+  background: var(--surface); border: var(--frame); box-shadow: var(--sheet-shadow);
   border-radius: var(--r-lg); padding: 18px;
   display: flex; flex-direction: column; gap: 14px;
 }
@@ -155,20 +156,20 @@ button { font-family: inherit; font-size: inherit; letter-spacing: inherit; curs
 textarea, input[type="password"], input[type="text"], select {
   width: 100%; font-family: var(--mono); font-size: 13px; line-height: 1.6;
   color: var(--ink); background: var(--surface);
-  border: 1px solid var(--line-2); border-radius: 4px; padding: 14px;
+  border: 1px solid var(--line-2); border-radius: 12px; padding: 14px;
 }
 textarea { min-height: 108px; resize: vertical; }
 input[type="password"], input[type="text"], select { font-family: var(--sans); font-size: 15px; min-height: 52px; }
 textarea:focus, input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 input[type="file"] { position: absolute; width: 1px; height: 1px; opacity: 0; }
-label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--accent); font-weight: 700; }
+label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--ink-2); font-weight: 700; }
 
 .howto { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; align-items: baseline; }
-.howto dt { font-family: var(--display); font-size: 15px; color: var(--accent); font-weight: 900; font-variant-numeric: tabular-nums; }
+.howto dt { font-size: 15px; color: var(--accent); font-weight: 800; font-variant-numeric: tabular-nums; }
 .howto dd { margin: 0; font-size: 14px; color: var(--ink-2); }
 
 .note {
-  padding: 13px 15px; border-radius: 4px; background: var(--surface-2);
+  padding: 14px 16px; border-radius: 12px; background: var(--surface-2);
   font-size: 14px; line-height: 1.6; color: var(--ink-2);
 }
 .note b { color: var(--ink); font-weight: 700; }
@@ -177,71 +178,75 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
 
 /* ─────────── header bits ─────────── */
 .masthead { padding-block: 18px 8px; display: flex; flex-direction: column; gap: 14px; }
-.homebar { display: flex; align-items: center; justify-content: space-between; min-height: 48px; border-bottom: 2px solid var(--accent); }
+.homebar { display: flex; align-items: center; justify-content: space-between; min-height: 52px; }
 .homebar .iconbtn { margin-left: 0; margin-right: -12px; }
 .wordmark { display: flex; align-items: baseline; gap: 10px; }
 .wordmark .dot { display: none; }
-.wordmark span { font-family: var(--display); font-size: 17px; font-weight: 900; letter-spacing: -.03em; color: var(--accent); }
+.wordmark span { font-size: 17px; font-weight: 900; letter-spacing: -.04em; color: var(--accent); }
 .wordmark small { font-size: 12px; color: var(--muted); }
 
 /* ── the first screen's one loud thing: yesterday's message as a form ──
    발신 / 내용 / 내 답 / 영문, with the English row left blank, and a 결재란
    where two of three boxes are already stamped. It says what the app does
    in the form people fill in at work every day. */
-.docform { margin: 10px 0 0; border: var(--frame); border-radius: 4px; background: var(--surface); overflow: hidden; }
-.docform .r { display: grid; grid-template-columns: 70px 1fr; border-top: 1px solid var(--line); }
+.docform { margin: 12px 0 0; border: var(--frame); border-radius: var(--r-lg); background: var(--surface); overflow: hidden; box-shadow: var(--sheet-shadow); }
+.docform .r { display: grid; grid-template-columns: 64px 1fr; align-items: baseline; border-top: 1px solid var(--line); padding: 0 16px; }
 .docform .r:first-child { border-top: 0; }
-.docform .k { background: var(--surface-2); color: var(--accent); font-weight: 700; font-size: 13px; padding: 10px 12px; border-right: 1px solid var(--line); }
-.docform .v { margin: 0; padding: 10px 12px; font-size: 14px; color: var(--ink-2); }
-.docform .v.en { font-family: var(--serif); font-size: 16px; color: var(--ink); }
-.docform .v.mine { background: var(--mine); color: var(--mine-ink); font-weight: 600; }
-.docform .v.blank { color: var(--muted); font-style: italic; }
+.docform .k { color: var(--muted); font-weight: 700; font-size: 12px; padding: 13px 0; }
+.docform .v { margin: 0; padding: 12px 0; font-size: 15px; color: var(--ink-2); }
+.docform .v.en { font-family: var(--serif); font-size: 17px; color: var(--ink); }
+.docform .v.mine { color: var(--mine-ink); font-weight: 700; }
+/* A highlighter stroke behind the words only, not a filled cell. */
+.docform .v.mine span { background: linear-gradient(transparent 50%, var(--mine) 50%); padding: 0 2px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.docform .v.blank { color: var(--muted); }
+.docform .v.blank::after { content: ""; display: block; height: 0; border-bottom: 1.5px dashed var(--line-2); margin-top: 4px; width: 70%; }
 
-.kyul { align-self: flex-end; display: grid; grid-template-columns: repeat(3, 56px); border: var(--frame); border-radius: 2px; background: var(--surface); }
+/* 결재란: the sign-off boxes in the corner of every internal document. */
+.kyul { align-self: flex-end; display: grid; grid-template-columns: repeat(3, 60px); border: var(--frame); border-radius: var(--r-md); background: var(--surface); overflow: hidden; }
 .kyul > div { border-left: 1px solid var(--line); text-align: center; }
 .kyul > div:first-child { border-left: 0; }
-.kyul small { display: block; font-size: 11px; font-weight: 700; color: var(--accent); background: var(--surface-2); border-bottom: 1px solid var(--line); padding: 3px 0; }
-.kyul p { height: 46px; margin: 0; display: grid; place-items: center; }
+.kyul small { display: block; font-size: 11px; font-weight: 700; color: var(--muted); border-bottom: 1px solid var(--line); padding: 4px 0; }
+.kyul p { height: 50px; margin: 0; display: grid; place-items: center; }
 
 /* The seal. Red, round, a little crooked, because a hand pressed it. */
 .stamp {
   display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 50%;
-  border: 2.5px solid var(--seal); color: var(--seal);
-  font-family: var(--display); font-weight: 900; font-size: 12.5px; letter-spacing: -.02em;
-  transform: rotate(-12deg);
+  border: 2px solid var(--seal); color: var(--seal);
+  font-weight: 900; font-size: 12.5px; letter-spacing: -.02em;
+  box-shadow: inset 0 0 0 2px var(--surface), inset 0 0 0 3px color-mix(in srgb, var(--seal) 55%, transparent);
+  transform: rotate(-8deg);
 }
-.stamp.big { width: 96px; height: 96px; border-width: 4px; font-size: 24px; }
+.stamp.big { width: 96px; height: 96px; border-width: 3px; font-size: 24px; box-shadow: inset 0 0 0 4px var(--surface), inset 0 0 0 5.5px color-mix(in srgb, var(--seal) 55%, transparent); }
 
 .topbar {
   display: flex; align-items: center; gap: 6px; padding-block: 12px 10px; min-height: 70px;
   position: sticky; top: env(safe-area-inset-top, 0px); background: var(--ground); z-index: 5;
-  border-bottom: 2px solid var(--accent); margin-bottom: 14px;
+  margin-bottom: 6px;
 }
 .topbar h2 { flex: 1; font-size: 20px; }
 
-.statline { display: flex; flex-wrap: wrap; border: var(--frame); border-radius: 2px; background: var(--surface); }
+.statline { display: flex; flex-wrap: wrap; border: var(--frame); border-radius: var(--r-md); background: var(--surface); overflow: hidden; }
 .stat { flex: 1; min-width: 84px; display: flex; flex-direction: column-reverse; border-left: 1px solid var(--line); text-align: center; }
 .stat:first-child { border-left: 0; }
-.stat span { font-size: 12px; font-weight: 700; color: var(--accent); background: var(--surface-2); border-bottom: 1px solid var(--line); padding: 5px 6px; }
-.stat b { font-family: var(--display); font-size: 24px; font-weight: 900; padding: 8px 6px; font-variant-numeric: tabular-nums; color: var(--ink); }
+.stat span { font-size: 12px; font-weight: 700; color: var(--muted); border-bottom: 1px solid var(--line); padding: 6px; }
+.stat b { font-size: 24px; font-weight: 900; letter-spacing: -.03em; padding: 8px 6px; font-variant-numeric: tabular-nums; color: var(--ink); }
 
-.rail { width: 100%; height: 5px; background: var(--line); border-radius: 0; overflow: hidden; }
-.rail i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .35s ease; }
+.rail { width: 100%; height: 6px; background: var(--surface-3); border-radius: 99px; overflow: hidden; }
+.rail i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .35s ease; }
 .rail.thin { height: 3px; }
 .spin { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--accent); animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ─────────── pickers, registers ─────────── */
-.pickers { display: flex; flex-direction: column; border: var(--frame); border-radius: 4px; overflow: hidden; }
+.pickers { display: flex; flex-direction: column; border: var(--frame); border-radius: var(--r-md); overflow: hidden; background: var(--surface); }
 .panel.slim { padding: 4px 6px 4px 16px; }
 .whoami { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .whoami span { font-size: 15px; color: var(--ink-2); }
 .whoami b { color: var(--ink); font-weight: 700; }
 .linkbtn {
   font-size: 14px; font-weight: 700; color: var(--accent);
-  padding: 6px 12px; min-height: 48px; border-radius: 4px;
+  padding: 6px 12px; min-height: 48px; border-radius: 10px;
   display: inline-flex; align-items: center; justify-content: center;
-  text-decoration: underline; text-underline-offset: 3px;
 }
 .linkbtn:active { background: var(--surface-2); }
 
@@ -257,7 +262,7 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
 
 /* A list of days or decks is a register: one framed table, a rule between
    entries, the date in the first column. */
-.days { display: flex; flex-direction: column; overflow-y: auto; border: var(--frame); border-radius: 4px; background: var(--surface); }
+.days { display: flex; flex-direction: column; overflow-y: auto; border: var(--frame); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--sheet-shadow); }
 .day {
   display: flex; align-items: center; gap: 14px; width: 100%;
   padding: 15px 16px; background: var(--surface); text-align: left;
@@ -271,8 +276,8 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
 .day .n { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; flex: none; }
 .day .dd {
   flex: none; width: 40px; text-align: center; align-self: stretch; display: grid; place-items: center;
-  margin: -15px 0 -15px -16px; padding: 0 0 0 0; width: 56px; background: var(--surface-2); border-right: 1px solid var(--line);
-  font-family: var(--display); font-size: 24px; line-height: 1; font-weight: 900; letter-spacing: -.04em;
+  width: 40px;
+  font-size: 26px; line-height: 1; font-weight: 900; letter-spacing: -.05em;
   font-variant-numeric: tabular-nums; color: var(--accent);
 }
 .day.ready .when span { color: var(--accent); font-weight: 700; }
@@ -280,8 +285,8 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
 .day.done::after {
   content: "완료"; position: absolute; right: 54px; top: 50%; margin-top: -19px;
   width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--seal); color: var(--seal);
-  display: grid; place-items: center; font-family: var(--display); font-weight: 900; font-size: 11.5px;
-  transform: rotate(-12deg); opacity: .92;
+  display: grid; place-items: center; font-weight: 900; font-size: 11.5px;
+  transform: rotate(-8deg); opacity: .92;
 }
 .day.done .when b { color: var(--muted); font-weight: 500; }
 
@@ -293,7 +298,7 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
    label-grey slip; mine are highlighted in yellow, like a printout someone
    marked up. */
 .bub {
-  max-width: 88%; padding: 10px 14px; border-radius: 4px;
+  max-width: 86%; padding: 11px 15px; border-radius: 14px;
   font-size: 15px; line-height: 1.5; white-space: pre-wrap; word-break: break-word;
   background: var(--surface-2); color: var(--ink-2);
   align-self: flex-start;
@@ -311,23 +316,23 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
 .bub.media { font-style: italic; color: var(--muted); }
 
 /* ─────────── practice: one document per card ─────────── */
-.pr-head { display: flex; align-items: center; gap: 10px; padding-block: 12px; border-bottom: 2px solid var(--accent); margin-bottom: 14px; }
+.pr-head { display: flex; align-items: center; gap: 10px; padding-block: 12px; margin-bottom: 8px; }
 .pr-head .iconbtn { margin-left: -12px; }
 .pr-head .rail { flex: 1; }
-.counter { font-family: var(--display); font-size: 16px; color: var(--accent); font-variant-numeric: tabular-nums; flex: none; font-weight: 900; }
+.counter { font-size: 15px; color: var(--ink-2); font-variant-numeric: tabular-nums; flex: none; font-weight: 800; }
 
 .deck {
   position: relative; flex: 0 1 auto;
   height: min(58vh, 520px); min-height: 280px;
   margin: auto 0 14px; touch-action: pan-y;
 }
-.deck:focus-visible { outline: 3px solid var(--seal); outline-offset: 6px; border-radius: 6px; }
+.deck:focus-visible { outline: 3px solid var(--accent); outline-offset: 6px; border-radius: var(--r-lg); }
 
 .swipe-card {
   position: absolute; inset: 0;
   background: var(--surface);
-  border: var(--frame); border-radius: 4px;
-  box-shadow: 0 1px 0 var(--line-2), 0 6px 18px rgba(26, 29, 36, .06);
+  border: var(--frame); border-radius: var(--r-lg);
+  box-shadow: 0 1px 2px rgba(26, 29, 36, .05), 0 14px 36px rgba(26, 29, 36, .09);
   padding: 0;
   display: flex; flex-direction: column;
   overflow: hidden;
@@ -342,37 +347,39 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
 /* The verdict is a seal pressed onto the sheet as you swipe. */
 .verdict {
   position: absolute; top: 58px; z-index: 3;
-  width: 88px; height: 88px; border-radius: 50%; border: 4px solid var(--seal); color: var(--seal);
+  width: 88px; height: 88px; border-radius: 50%; border: 3px solid var(--seal); color: var(--seal);
   display: grid; place-items: center; background: color-mix(in srgb, var(--surface) 70%, transparent);
-  font-family: var(--display); font-size: 22px; font-weight: 900; letter-spacing: -.02em;
+  font-size: 22px; font-weight: 900; letter-spacing: -.02em;
+  box-shadow: inset 0 0 0 4px var(--surface), inset 0 0 0 5.5px color-mix(in srgb, var(--seal) 55%, transparent);
   opacity: 0; pointer-events: none;
 }
-.verdict.yes { right: 18px; transform: rotate(-14deg); }
-.verdict.no { left: 18px; transform: rotate(10deg); }
+.verdict.yes { right: 18px; transform: rotate(-8deg); }
+.verdict.no { left: 18px; transform: rotate(8deg); }
 
 /* The document title row: 건명 and, for a review, a small tag. */
 .tags {
   display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap;
-  margin: 0 -16px; padding: 12px 16px; border-bottom: var(--frame);
+  margin: 0 -16px; padding: 14px 16px; border-bottom: var(--frame);
 }
-.tag { font-family: var(--display); font-size: 18px; font-weight: 900; color: var(--ink); letter-spacing: -.03em; }
-.tag::before { content: "건명: "; }
-.tag.rev { font-family: var(--sans); font-size: 12px; font-weight: 700; color: var(--seal); border: 1.5px solid var(--seal); padding: 1px 7px; border-radius: 3px; margin-left: auto; }
+/* 건명 sits above the title as a small label, the way a form field is labelled. */
+.tag { font-size: 19px; font-weight: 900; color: var(--ink); letter-spacing: -.035em; }
+.tag::before { content: "건명"; display: block; font-size: 11.5px; font-weight: 700; color: var(--muted); letter-spacing: 0; margin-bottom: 1px; }
+.tag.rev { font-size: 12px; font-weight: 700; color: var(--seal); background: var(--seal-soft); padding: 3px 8px; border-radius: 99px; margin-left: auto; align-self: center; }
 .tag.rev::before { content: none; }
 
-.lbl { font-size: 12px; font-weight: 700; color: var(--accent); margin-bottom: -6px; }
+.lbl { font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: -6px; }
 .ctx { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; min-height: 0; }
-.ctx .bub { background: none; border-left: 3px solid var(--line-2); border-radius: 0; padding: 2px 0 2px 12px; max-width: 100%; }
-.ctx .bub.mine { border-left-color: var(--mine-line); }
+.ctx .bub { background: var(--surface-2); border-radius: 12px; padding: 10px 14px; max-width: 100%; }
+.ctx .bub.mine { background: var(--mine); }
 .target {
   background: var(--mine); color: var(--mine-ink);
-  border-radius: 2px; padding: 14px 16px;
+  border-radius: 12px; padding: 14px 16px;
   font-size: 21px; line-height: 1.4; font-weight: 700; letter-spacing: -.03em;
   white-space: pre-wrap; word-break: keep-all; overflow-wrap: anywhere;
 }
 
 .answer {
-  margin-top: auto; border-top: 1px dashed var(--line-2); padding-top: 14px;
+  margin-top: auto; border-top: 1px solid var(--line); padding-top: 14px;
   display: flex; flex-direction: column; gap: 10px;
 }
 .en-row { display: flex; align-items: flex-start; gap: 10px; }
@@ -380,9 +387,9 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
 .en { font-family: var(--serif); font-size: 25px; line-height: 1.3; color: var(--ink); letter-spacing: 0; text-wrap: balance; }
 
 .say {
-  flex: none; width: 48px; height: 48px; border-radius: 4px;
+  flex: none; width: 48px; height: 48px; border-radius: 12px;
   display: grid; place-items: center; margin-top: -4px;
-  color: var(--accent); box-shadow: inset 0 0 0 1.5px var(--accent);
+  color: var(--accent); background: var(--accent-soft);
 }
 .say svg { width: 20px; height: 20px; }
 .say:active { background: var(--accent-soft); }
@@ -395,7 +402,7 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
 .heard b { color: var(--ink-2); font-weight: 600; }
 .score {
   display: inline-flex; gap: 6px; font-size: 14px; font-weight: 700;
-  padding: 4px 10px; border-radius: 3px; align-self: flex-start; font-variant-numeric: tabular-nums;
+  padding: 4px 10px; border-radius: 99px; align-self: flex-start; font-variant-numeric: tabular-nums;
 }
 .score.hit { background: var(--yes-soft); color: var(--yes-text); }
 .score.miss { background: var(--no-soft); color: var(--no-text); }
@@ -406,24 +413,24 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
 }
 
 .flip {
-  align-self: stretch; margin-top: auto; min-height: 52px; border-radius: 4px;
-  box-shadow: inset 0 0 0 1.5px var(--accent);
-  font-weight: 700; font-size: 16px; color: var(--accent);
+  align-self: stretch; margin-top: auto; min-height: 52px; border-radius: var(--r-md);
+  background: var(--surface-2);
+  font-weight: 700; font-size: 16px; color: var(--ink);
 }
-.flip:active { background: var(--accent-soft); }
+.flip:active { background: var(--surface-3); }
 
-/* dock: 반려 / 말하기 / 결재 — words, not just icons, because the words are
+/* dock: 반려 / 보고 / 결재 — words, not just icons, because the words are
    the grading. */
 .dock {
   display: grid; grid-template-columns: 1fr 1.25fr 1fr; gap: 10px;
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 .swipebtn, .mic {
-  min-height: 60px; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 60px; border-radius: 14px; display: flex; align-items: center; justify-content: center; gap: 6px;
   font-weight: 700; font-size: 16px;
 }
 .swipebtn svg, .mic svg { width: 20px; height: 20px; flex: none; }
-.swipebtn.no { color: var(--seal); box-shadow: inset 0 0 0 1.5px var(--seal); background: var(--surface); }
+.swipebtn.no { color: var(--seal); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--seal) 60%, transparent); background: var(--surface); }
 .swipebtn.no:active { background: var(--seal-soft); }
 .swipebtn.yes { color: var(--seal-ink); background: var(--seal); }
 .swipebtn.yes:active { filter: brightness(.92); }

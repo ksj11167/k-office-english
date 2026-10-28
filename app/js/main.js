@@ -553,7 +553,7 @@ function onSwipe(ref, dir) {
   save();
   updateProgress();
   $('pr-hint').textContent = deck.remaining() > 0
-    ? '말해 보고 정답을 확인한 뒤, 말할 수 있었으면 결재'
+    ? '영어로 보고하고 정답을 본 뒤, 말할 수 있었으면 결재'
     : '';
 }
 
@@ -656,7 +656,7 @@ $('mic').addEventListener('click', async () => {
   heardText = '';
   listening = true;
   $('mic').classList.add('live');
-  $('pr-hint').textContent = '듣고 있습니다… 다 말하면 다시 누르세요';
+  $('pr-hint').textContent = '듣고 있습니다… 보고가 끝나면 다시 누르세요';
   await recog.start();
 });
 

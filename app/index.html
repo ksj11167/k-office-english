@@ -14,7 +14,7 @@
 <title>K-직장인 영어</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&family=Noto+Serif+KR:wght@700;900&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
 <link rel="stylesheet" href="styles.css">
 
 <div id="app">
@@ -34,8 +34,8 @@
       <figure class="docform" aria-label="예시: 박팀장의 영어 질문, 내가 한국어로 한 대답, 그리고 영어로 말해서 채울 칸">
         <div class="r"><span class="k">발신</span><p class="v">박팀장</p></div>
         <div class="r"><span class="k">내용</span><p class="v en">Sejin, where did that deploy end up?</p></div>
-        <div class="r"><span class="k">내 답</span><p class="v mine">지금 QA 돌리고 있습니다</p></div>
-        <div class="r"><span class="k">영문</span><p class="v blank">말해서 채우기</p></div>
+        <div class="r"><span class="k">내 답</span><p class="v mine"><span>지금 QA 돌리고 있습니다</span></p></div>
+        <div class="r"><span class="k">영문</span><p class="v blank">영어로 보고해서 채우기</p></div>
       </figure>
       <div class="kyul" aria-hidden="true">
         <div><small>담당</small><p><span class="stamp">결재</span></p></div>
@@ -168,12 +168,12 @@
 
     <div id="deck" aria-label="말하기 카드. 좌우 화살표 키로 넘길 수 있습니다."></div>
 
-    <p class="hint" id="pr-hint">말해 보고 정답을 확인한 뒤, 말할 수 있었으면 결재</p>
+    <p class="hint" id="pr-hint">영어로 보고하고 정답을 본 뒤, 말할 수 있었으면 결재</p>
     <div class="dock">
       <button class="swipebtn no" id="sw-no" aria-label="반려: 다시 볼 카드, 왼쪽으로 넘기기">반려</button>
-      <button class="mic" id="mic" aria-label="영어로 말하기">
+      <button class="mic" id="mic" aria-label="보고: 영어로 소리 내어 말하기">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/></svg>
-        말하기
+        보고
       </button>
       <button class="swipebtn yes" id="sw-yes" aria-label="결재: 말할 수 있었다, 오른쪽으로 넘기기">결재</button>
     </div>
