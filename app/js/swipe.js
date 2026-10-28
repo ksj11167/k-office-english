@@ -34,8 +34,8 @@ export function createSwipeDeck(root, { render, onSwipe, onEmpty }) {
       const el = document.createElement('article');
       el.className = 'swipe-card';
       el.innerHTML =
-        '<div class="verdict yes" aria-hidden="true">외웠다</div>' +
-        '<div class="verdict no" aria-hidden="true">다시</div>' +
+        '<div class="verdict yes" aria-hidden="true">통과</div>' +
+        '<div class="verdict no" aria-hidden="true">반려</div>' +
         '<div class="swipe-body"></div>';
       root.append(el);
       cards.unshift(el);                              // cards[0] is the front card

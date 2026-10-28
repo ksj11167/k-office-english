@@ -493,10 +493,13 @@ function renderCard(body, ref) {
     `<span class="who">${esc(x.speaker)}</span>` +
     esc(x.en || x.ko) + '</div>').join('');
 
+  // Laid out as a document: 건명 (the situation), what was received, what I
+  // answered in Korean, and the English row that the flip fills in.
   body.innerHTML =
     `<div class="tags"><span class="tag">${esc(c.situation || '대화')}</span>` +
     (ref.review ? '<span class="tag rev">복습</span>' : '') + '</div>' +
-    `<div class="ctx">${ctx}</div>` +
+    (ctx ? `<div class="lbl">받은 말</div><div class="ctx">${ctx}</div>` : '') +
+    '<div class="lbl">내 답</div>' +
     `<div class="target">${esc(c.ko)}</div>` +
     '<div class="answer hide">' +
       '<div class="en-row">' +
@@ -521,7 +524,7 @@ function revealIn(body) {
   body.querySelector('.answer').classList.remove('hide');
   const flip = body.querySelector('.flip');
   if (flip) flip.remove();
-  $('pr-hint').textContent = '말할 수 있었으면 오른쪽, 아니면 왼쪽으로';
+  $('pr-hint').textContent = '말할 수 있었으면 통과, 아니면 반려';
   // Hearing it is most of the point of revealing it, so it plays without asking.
   // The button is still there to hear it again.
   const say = body.querySelector('.say');
@@ -550,7 +553,7 @@ function onSwipe(ref, dir) {
   save();
   updateProgress();
   $('pr-hint').textContent = deck.remaining() > 0
-    ? '카드를 눌러 정답을 보고, 오른쪽으로 넘기면 외운 것'
+    ? '말해 보고 정답을 확인한 뒤, 말할 수 있었으면 통과'
     : '';
 }
 
@@ -576,17 +579,18 @@ function finish() {
   const learned = day && day.cards ? day.cards.filter((c) => isLearned(c.srs)).length : 0;
 
   $('done-eyebrow').textContent = day ? day.date : '세션';
-  $('done-title').textContent = sessionDone > 0 ? '오늘치 끝' : '세션 종료';
+  $('done-title').textContent = sessionDone > 0 ? '오늘치 결재 완료' : '세션 종료';
+  $('done-stamp').classList.toggle('hide', sessionDone === 0);
   $('done-stats').innerHTML = [
-    ['외운 카드', sessionDone],
+    ['통과', sessionDone],
     ['이 날 익힘', learned],
     ['남은 날짜', state.days.filter((d) => dayStatus(d) !== 'done').length],
   ].map(([k, v]) => `<div class="stat"><b>${v}</b><span>${k}</span></div>`).join('');
 
   const soonest = day && day.cards && day.cards.length ? dueLabel(day.cards[0].srs) : '';
   $('done-sub').textContent = soonest
-    ? `왼쪽으로 넘긴 카드는 더 자주 돌아옵니다. 다음 복습은 ${soonest}.`
-    : '왼쪽으로 넘긴 카드는 더 자주 돌아옵니다.';
+    ? `반려한 카드는 더 자주 돌아옵니다. 다음 복습은 ${soonest}.`
+    : '반려한 카드는 더 자주 돌아옵니다.';
 
   $('next-day').classList.toggle('hide', left < 0);
   if (left >= 0) {
@@ -603,13 +607,14 @@ function finishJob() {
   const waiting = cards.filter((c) => c.srs.reps === 0 || isDue(c.srs)).length;
 
   $('done-eyebrow').textContent = src.name;
-  $('done-title').textContent = sessionDone > 0 ? '10장 끝' : waiting ? '세션 종료' : '지금은 복습할 카드가 없습니다';
+  $('done-title').textContent = sessionDone > 0 ? '10장 결재 완료' : waiting ? '세션 종료' : '지금은 복습할 카드가 없습니다';
+  $('done-stamp').classList.toggle('hide', sessionDone === 0);
   $('done-stats').innerHTML = [
-    ['외운 카드', sessionDone],
+    ['통과', sessionDone],
     ['이 덱 익힘', `${learned}/${cards.length}`],
   ].map(([k, v]) => `<div class="stat"><b>${v}</b><span>${k}</span></div>`).join('');
   $('done-sub').textContent = waiting
-    ? '왼쪽으로 넘긴 카드는 더 자주 돌아옵니다.'
+    ? '반려한 카드는 더 자주 돌아옵니다.'
     : `다음 복습은 ${dueLabel(cards[0].srs)}. 다른 직무도 해 보세요.`;
 
   $('next-day').classList.toggle('hide', !waiting);
@@ -691,7 +696,7 @@ function judge() {
     mw.classList.remove('hide');
     mw.innerHTML = '빠진 말: ' + missed.slice(0, 8).map((w) => `<u>${esc(w)}</u>`).join(' ');
   }
-  $('pr-hint').textContent = pct >= 70 ? '통했으면 오른쪽으로 넘기세요' : '아쉬우면 왼쪽으로 넘기세요';
+  $('pr-hint').textContent = pct >= 70 ? '통했습니다. 통과를 누르세요' : '아쉬우면 반려하고 다시 보세요';
 }
 
 /* ══════ settings ══════ */

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#2952e3">
+<meta name="theme-color" content="#1f2d4f">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="icon" href="icons/icon-192.png">
@@ -14,7 +14,7 @@
 <title>K-직장인 영어</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&family=Noto+Serif+KR:wght@700;900&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
 <link rel="stylesheet" href="styles.css">
 
 <div id="app">
@@ -23,19 +23,25 @@
   <section class="screen on" id="s-home">
     <div class="masthead">
       <div class="homebar">
-        <div class="wordmark"><i class="dot"></i><span>K-직장인 영어</span></div>
+        <div class="wordmark"><i class="dot"></i><span>K-직장인 영어</span><small>업무 영어 연습</small></div>
         <button class="iconbtn" id="go-settings" aria-label="설정"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
       </div>
-      <!-- The product in one glance: yesterday's question in English, my own
-           answer in Korean, and my turn, still being typed. That turn is the
-           whole app, so it is the one loud thing on the screen. -->
-      <figure class="hero-chat" aria-label="예시 대화: 팀장님의 영어 질문, 내가 한국어로 한 대답, 그리고 영어로 채울 내 차례">
-        <p class="hc them"><span class="who">박팀장</span>Sejin, where did that deploy end up yesterday?</p>
-        <p class="hc mine">지금 QA 돌리고 있습니다</p>
-        <p class="hc turn" aria-hidden="true"><i></i><i></i><i></i></p>
-      </figure>
-      <h1>어제 단톡방 대화로<br>영어 말하기 연습</h1>
+      <h1>어제 단톡방에서 한 말,<br>영어로 결재받기</h1>
       <p>카톡 대화를 영어로 옮기고, 내가 한 말만 골라 말하기 카드로 만듭니다.</p>
+      <!-- The product in one glance, as the form people fill in at work: who
+           sent it, what they said in English, what I answered in Korean, and
+           the English row left for me to fill by speaking. -->
+      <figure class="docform" aria-label="예시: 박팀장의 영어 질문, 내가 한국어로 한 대답, 그리고 영어로 말해서 채울 칸">
+        <div class="r"><span class="k">발신</span><p class="v">박팀장</p></div>
+        <div class="r"><span class="k">내용</span><p class="v en">Sejin, where did that deploy end up?</p></div>
+        <div class="r"><span class="k">내 답</span><p class="v mine">지금 QA 돌리고 있습니다</p></div>
+        <div class="r"><span class="k">영문</span><p class="v blank">말해서 채우기</p></div>
+      </figure>
+      <div class="kyul" aria-hidden="true">
+        <div><small>담당</small><p><span class="stamp">통과</span></p></div>
+        <div><small>팀장</small><p><span class="stamp">통과</span></p></div>
+        <div><small>본부장</small><p></p></div>
+      </div>
     </div>
 
     <div class="stack" style="margin-top:auto; padding-top:24px">
@@ -162,23 +168,21 @@
 
     <div id="deck" aria-label="말하기 카드. 좌우 화살표 키로 넘길 수 있습니다."></div>
 
-    <p class="hint" id="pr-hint">카드를 눌러 정답을 보고, 오른쪽으로 넘기면 외운 것</p>
+    <p class="hint" id="pr-hint">말해 보고 정답을 확인한 뒤, 말할 수 있었으면 통과</p>
     <div class="dock">
-      <button class="swipebtn no" id="sw-no" aria-label="다시 — 왼쪽으로 넘기기">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
-      </button>
+      <button class="swipebtn no" id="sw-no" aria-label="반려: 다시 볼 카드, 왼쪽으로 넘기기">반려</button>
       <button class="mic" id="mic" aria-label="영어로 말하기">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/></svg>
+        말하기
       </button>
-      <button class="swipebtn yes" id="sw-yes" aria-label="외웠다 — 오른쪽으로 넘기기">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-      </button>
+      <button class="swipebtn yes" id="sw-yes" aria-label="통과: 말할 수 있었다, 오른쪽으로 넘기기">통과</button>
     </div>
   </section>
 
   <!-- ══════ DONE ══════ -->
   <section class="screen" id="s-done">
     <div class="center">
+      <span class="stamp big hide" id="done-stamp" aria-hidden="true">통과</span>
       <div class="eyebrow" id="done-eyebrow">하루치 완료</div>
       <h1 id="done-title">오늘치 끝</h1>
       <div class="statline" id="done-stats" style="justify-content:center"></div>
