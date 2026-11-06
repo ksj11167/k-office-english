@@ -21,24 +21,25 @@ jobs:
       # is optional and the app works without it — so that case reports what to
       # do and stops, leaving main green. Some filled in but not all IS a
       # failure: a half-configured deploy is a mistake someone made partway.
+      #
+      # Three values are required. The quota store and the salt are not: the
+      # deploy finds or makes the store itself, and a missing salt is generated
+      # (it only resets the day's counts when it changes).
       - name: Check the settings are filled in
         id: check
         env:
           CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           ANTHROPIC: ${{ secrets.ANTHROPIC_API_KEY }}
-          SALT: ${{ secrets.QUOTA_SALT }}
-          KV_ID: ${{ vars.CLOUDFLARE_KV_ID }}
         run: |
           missing=""; present=0
-          for pair in "CLOUDFLARE_API_TOKEN:$CF_TOKEN" "CLOUDFLARE_ACCOUNT_ID:$CF_ACCOUNT" \
-                      "ANTHROPIC_API_KEY:$ANTHROPIC" "QUOTA_SALT:$SALT" "CLOUDFLARE_KV_ID(변수):$KV_ID"; do
+          for pair in "CLOUDFLARE_API_TOKEN:$CF_TOKEN" "CLOUDFLARE_ACCOUNT_ID:$CF_ACCOUNT" "ANTHROPIC_API_KEY:$ANTHROPIC"; do
             name="${pair%%:*}"; value="${pair#*:}"
             if [ -n "$value" ]; then present=$((present + 1)); else missing="$missing $name"; fi
           done
 
           if [ "$present" = 0 ]; then
-            echo "::notice::번역 서버가 아직 설정되지 않았습니다. 켜려면 server/README.md 를 따라 저장소 설정에 값 5개를 넣으세요. 앱은 서버 없이도 동작합니다."
+            echo "::notice::번역 서버가 아직 설정되지 않았습니다. 켜려면 server/README.md 를 따라 저장소 시크릿 3개를 넣으세요. 앱은 서버 없이도 동작합니다."
             echo "configured=no" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -48,7 +49,7 @@ jobs:
             exit 1
           fi
 
-          echo "설정 5개 전부 채워져 있습니다."
+          echo "시크릿 3개 전부 채워져 있습니다."
           echo "configured=yes" >> "$GITHUB_OUTPUT"
 
       - name: Warn if the key does not look like an Anthropic key
@@ -63,17 +64,48 @@ jobs:
       - if: steps.check.outputs.configured == 'yes'
         run: node server/worker.test.mjs
 
-      # The namespace id is not a secret, but it is account-specific, so it
-      # comes from a repository variable rather than being committed.
-      - name: Point wrangler at this account's KV namespace
+      # The namespace id is not a secret, but it is account-specific. A repo
+      # variable wins when set; otherwise the store is looked up by its title
+      # through the Cloudflare API and created the first time. The "Edit
+      # Cloudflare Workers" token template already includes KV edit.
+      - name: Find or create the quota store
         if: steps.check.outputs.configured == 'yes'
         env:
           KV_ID: ${{ vars.CLOUDFLARE_KV_ID }}
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          sed -i "s|REPLACE_ME|$KV_ID|" server/wrangler.toml
+          id="$KV_ID"
+          if [ -z "$id" ]; then
+            api="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/storage/kv/namespaces"
+            find() { curl -fsS -H "Authorization: Bearer $CF_TOKEN" "$api?per_page=100" | jq -r '.result[] | select(.title=="koe-translate-quota") | .id' | head -1; }
+            id=$(find) || { echo "::error::Cloudflare 에서 KV 목록을 읽지 못했습니다. 토큰이 «Edit Cloudflare Workers» 템플릿으로 만든 것인지, 계정 ID 가 맞는지 확인하세요."; exit 1; }
+            if [ -z "$id" ]; then
+              curl -fsS -X POST -H "Authorization: Bearer $CF_TOKEN" -H 'content-type: application/json' \
+                --data '{"title":"koe-translate-quota"}' "$api" >/dev/null \
+                || { echo "::error::KV 저장소를 만들지 못했습니다. 토큰 권한에 Workers KV Storage: Edit 가 있는지 확인하세요."; exit 1; }
+              id=$(find)
+              echo "사용량 저장소를 새로 만들었습니다."
+            fi
+          fi
+          [ -n "$id" ] || { echo "::error::KV 저장소 ID 를 정하지 못했습니다."; exit 1; }
+          sed -i "s|REPLACE_ME|$id|" server/wrangler.toml
           grep -n 'id =' server/wrangler.toml
 
+      - name: Pick the quota salt
+        if: steps.check.outputs.configured == 'yes'
+        env:
+          SALT: ${{ secrets.QUOTA_SALT }}
+        run: |
+          if [ -z "$SALT" ]; then
+            SALT=$(openssl rand -hex 24)
+            echo "::notice::QUOTA_SALT 시크릿이 없어 새로 만들었습니다. 배포할 때마다 바뀌어 그날 사용량이 초기화됩니다. 고정하려면 시크릿으로 넣으세요."
+          fi
+          echo "::add-mask::$SALT"
+          echo "QUOTA_SALT=$SALT" >> "$GITHUB_ENV"
+
       - uses: cloudflare/wrangler-action@v4
+        id: deploy
         if: steps.check.outputs.configured == 'yes'
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -86,10 +118,13 @@ jobs:
             QUOTA_SALT
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          QUOTA_SALT: ${{ secrets.QUOTA_SALT }}
 
       - name: What to do next
         if: steps.check.outputs.configured == 'yes'
+        env:
+          URL: ${{ steps.deploy.outputs.deployment-url }}
         run: |
-          echo "배포됐습니다. 워커 주소를 저장소 변수 PROXY_URL 에 넣으면"
-          echo "앱이 그 서버로 번역합니다 (Settings → Secrets and variables → Actions → Variables)."
+          echo "배포됐습니다: ${URL:-(주소는 위 wrangler 출력의 workers.dev 줄)}"
+          echo "### 번역 서버 주소" >> "$GITHUB_STEP_SUMMARY"
+          echo "\`${URL:-위 로그 참조}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "이 주소를 app/js/translate.js 의 PROXY_URL 에 넣거나 저장소 변수 PROXY_URL 로 두면 앱이 이 서버로 번역합니다."

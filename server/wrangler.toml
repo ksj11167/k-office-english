@@ -4,11 +4,14 @@ compatibility_date = "2026-09-01"
 
 [vars]
 # Where the app is served from. The proxy answers nobody else, so a copy of the
-# page on someone else's domain cannot spend this key.
-ALLOWED_ORIGINS = "https://ksj11167.github.io"
+# page on someone else's domain cannot spend this key. The two localhost
+# entries are the store apps: Capacitor serves the bundled page from
+# https://localhost on Android and capacitor://localhost on iOS, and without
+# them every translation from an installed app is refused.
+ALLOWED_ORIGINS = "https://ksj11167.github.io,https://localhost,capacitor://localhost"
 # Free translations per caller per day. A day of chat is one or two calls.
 DAILY_LIMIT = "20"
-MODEL = "claude-opus-5"
+MODEL = "claude-opus-5-5"
 
 # npx wrangler kv namespace create QUOTA  →  paste the id here
 [[kv_namespaces]]

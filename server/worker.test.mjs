@@ -187,17 +187,47 @@ await test('a bad image request does not spend quota', async () => {
 await test('only known models are accepted; anything else falls back', async () => {
   const { calls } = await withUpstream(() => ok('[]'),
     () => worker.fetch(post({ prompt: 'x', model: 'gpt-4' }), env()));
-  assert.equal(JSON.parse(calls[0].init.body).model, 'claude-opus-5');
+  assert.equal(JSON.parse(calls[0].init.body).model, 'claude-opus-5-5');
 
   const { calls: c2 } = await withUpstream(() => ok('[]'),
-    () => worker.fetch(post({ prompt: 'x', model: 'claude-haiku-4-5' }), env()));
-  assert.equal(JSON.parse(c2[0].init.body).model, 'claude-haiku-4-5');
+    () => worker.fetch(post({ prompt: 'x', model: 'claude-haiku-5-5' }), env()));
+  assert.equal(JSON.parse(c2[0].init.body).model, 'claude-haiku-5-5');
 });
 
 await test('replies are marked no-store so a shared cache never holds a conversation', async () => {
   const { result } = await withUpstream(() => ok('[]'),
     () => worker.fetch(post({ prompt: 'x' }), env()));
   assert.equal(result.headers.get('cache-control'), 'no-store');
+});
+
+await test('a declined request falls back on the server instead of failing', async () => {
+  const { calls } = await withUpstream(() => ok('[]'),
+    () => worker.fetch(post({ prompt: 'x' }), env()));
+  const body = JSON.parse(calls[0].init.body);
+  assert.equal(body.fallbacks, 'default');
+  assert.equal(calls[0].init.headers['anthropic-beta'], 'server-side-fallback-2026-07-01');
+  assert.equal(body.output_config.effort, 'low');
+  assert.ok(!('thinking' in body), 'thinking cannot be disabled on Opus 5.5; sending it is a 400');
+});
+
+// The deployed origins live in wrangler.toml, not in env() above. Missing the
+// two localhost entries refuses every request from the installed apps, which
+// nothing else in this file would notice.
+await test('the store apps are allowed origins in the deployed config', async () => {
+  const toml = (await import('node:fs')).readFileSync(new URL('./wrangler.toml', import.meta.url), 'utf8');
+  const line = toml.match(/^ALLOWED_ORIGINS\s*=\s*"([^"]*)"/m);
+  assert.ok(line, 'ALLOWED_ORIGINS missing from wrangler.toml');
+  const list = line[1].split(',').map((x) => x.trim());
+  for (const o of ['https://ksj11167.github.io', 'https://localhost', 'capacitor://localhost']) {
+    assert.ok(list.includes(o), o + ' is not allowed');
+  }
+  const native = env({ ALLOWED_ORIGINS: line[1] });
+  for (const o of ['https://localhost', 'capacitor://localhost']) {
+    const { result } = await withUpstream(() => ok('[]'),
+      () => worker.fetch(post({ prompt: 'x' }, { origin: o }), native));
+    assert.equal(result.status, 200, o + ' was refused');
+    assert.equal(result.headers.get('access-control-allow-origin'), o);
+  }
 });
 
 await test('preflight is answered without a key and without a model call', async () => {

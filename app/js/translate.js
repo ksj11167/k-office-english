@@ -26,9 +26,9 @@ const MODEL_STORE = 'rte.model';
 export const PROXY_URL = '';
 
 export const MODELS = [
-  { id: 'claude-opus-5', label: 'Opus 5 · 가장 정확' },
-  { id: 'claude-sonnet-5', label: 'Sonnet 5 · 균형' },
-  { id: 'claude-haiku-4-5', label: 'Haiku 4.5 · 가장 저렴' },
+  { id: 'claude-opus-5-5', label: 'Opus 5.5 · 가장 정확' },
+  { id: 'claude-sonnet-5-5', label: 'Sonnet 5.5 · 균형' },
+  { id: 'claude-haiku-5-5', label: 'Haiku 5.5 · 가장 저렴' },
 ];
 
 let sampleFn = null;
@@ -58,8 +58,12 @@ export const getKey = () => {
 export const setKey = (v) => {
   try { v ? localStorage.setItem(KEY_STORE, v) : localStorage.removeItem(KEY_STORE); } catch { /* private mode */ }
 };
+// A model saved before an upgrade may no longer be offered; fall back rather
+// than send an id the API may retire.
 export const getModel = () => {
-  try { return localStorage.getItem(MODEL_STORE) || MODELS[0].id; } catch { return MODELS[0].id; }
+  let saved = '';
+  try { saved = localStorage.getItem(MODEL_STORE) || ''; } catch { /* private mode */ }
+  return MODELS.some((m) => m.id === saved) ? saved : MODELS[0].id;
 };
 export const setModel = (v) => {
   try { localStorage.setItem(MODEL_STORE, v); } catch { /* private mode */ }
@@ -210,7 +214,8 @@ async function viaApi(prompt, images = []) {
       },
       body: JSON.stringify({
         model: getModel(),
-        max_tokens: 8192,
+        max_tokens: 16000,
+        output_config: { effort: 'low' },
         messages: [{ role: 'user', content }],
       }),
     });

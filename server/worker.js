@@ -25,7 +25,7 @@ const MAX_IMAGES = 10;
 const MAX_IMAGE = 1_500_000;
 const MAX_BODY = MAX_PROMPT + MAX_IMAGES * MAX_IMAGE;
 const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
-const MODELS = new Set(['claude-opus-5', 'claude-sonnet-5', 'claude-haiku-4-5']);
+const MODELS = new Set(['claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5']);
 
 export default {
   async fetch(request, env) {
@@ -68,7 +68,7 @@ export default {
       return fail(429, 'daily_limit', cors, { limit: quota.limit, resets: quota.resets });
     }
 
-    const model = MODELS.has(body.model) ? body.model : (env.MODEL || 'claude-opus-5');
+    const model = MODELS.has(body.model) ? body.model : (env.MODEL || 'claude-opus-5-5');
 
     let res;
     try {
@@ -78,14 +78,21 @@ export default {
           'content-type': 'application/json',
           'x-api-key': env.ANTHROPIC_API_KEY,
           'anthropic-version': '2023-06-01',
+          // A safety classifier can decline a harmless work chat now and then.
+          // With fallbacks the API re-runs that request on a model it routes to
+          // itself, inside the same call, instead of the user seeing a refusal.
+          'anthropic-beta': 'server-side-fallback-2026-07-01',
         },
         body: JSON.stringify({
           model,
-          max_tokens: 8192,
+          // Room for a long day, or ten screenshots read back as rows, plus
+          // the thinking that counts against the same limit.
+          max_tokens: 16000,
           // Short conversational lines are not a reasoning problem. Thinking
-          // stays on — disabling it on Opus 5 has its own failure modes — but
-          // at the lowest effort, which is where this workload belongs.
+          // cannot be turned off on Opus 5.5; the lowest effort is where this
+          // workload belongs.
           output_config: { effort: 'low' },
+          fallbacks: 'default',
           messages: [{ role: 'user', content }],
         }),
       });

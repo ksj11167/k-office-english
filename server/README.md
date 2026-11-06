@@ -59,53 +59,39 @@ Cloudflare 자체는 이 규모에서 **무료**입니다. 나가는 돈은 Anth
    «Account ID»가 있습니다. 복사
 3. **API 토큰**: 오른쪽 위 프로필 → **My Profile → API Tokens → Create Token**
    → «Edit Cloudflare Workers» 템플릿 선택 → 만들고 복사
-4. **저장 공간 만들기**: **Workers & Pages → KV → Create a namespace**,
-   이름은 `QUOTA`. 만들어지면 옆에 뜨는 **ID**를 복사
 
-> KV는 «누가 오늘 몇 번 썼는지»만 세는 작은 저장소입니다. 대화는 여기 저장되지
-> 않습니다.
+> 사용량을 세는 작은 저장소(KV)는 배포가 처음 돌 때 **알아서 만듭니다.** 따로 만들
+> 필요 없습니다. 대화는 거기 저장되지 않습니다.
 
-### 3. GitHub에 값 넣기
+### 3. GitHub에 시크릿 세 개
 
-저장소 → **Settings → Secrets and variables → Actions**
-
-**Secrets** 탭에서 **New repository secret**을 눌러 네 개:
+저장소 → **Settings → Secrets and variables → Actions → Secrets 탭 → New repository secret**
 
 | 이름 | 값 |
 |---|---|
 | `ANTHROPIC_API_KEY` | 1번에서 복사한 키 |
 | `CLOUDFLARE_API_TOKEN` | 2-3번 토큰 |
 | `CLOUDFLARE_ACCOUNT_ID` | 2-2번 계정 ID |
-| `QUOTA_SALT` | 아무 길고 무작위한 문자열. 비밀번호 생성기로 40자쯤 |
-
-**Variables** 탭에서 **New repository variable** 한 개:
-
-| 이름 | 값 |
-|---|---|
-| `CLOUDFLARE_KV_ID` | 2-4번 KV의 ID |
 
 > Secrets는 한 번 저장하면 **아무도 다시 볼 수 없습니다** — 저도, GitHub 화면에서도.
 > 값이 틀리면 고쳐 넣는 게 아니라 새로 덮어씁니다.
+>
+> `QUOTA_SALT`는 선택입니다. 없으면 배포할 때마다 새로 만들어지고, 그때 그날 사용량
+> 카운트가 초기화될 뿐입니다.
 
 ### 4. 배포
 
 저장소 → **Actions → Deploy translation proxy → Run workflow**
 
-값이 하나라도 비어 있으면 **무엇이 비었는지 알려주고 멈춥니다.** 성공하면 로그에
-워커 주소가 나옵니다 — `https://koe-translate.무언가.workers.dev` 형태입니다.
+값이 하나라도 비어 있으면 **무엇이 비었는지 알려주고 멈춥니다.** 성공하면 실행 결과
+요약에 워커 주소가 나옵니다 — `https://koe-translate.무언가.workers.dev` 형태입니다.
 
 ### 5. 앱에게 서버 주소 알려주기
 
-**Settings → Secrets and variables → Actions → Variables**에 하나 더:
-
-| 이름 | 값 |
-|---|---|
-| `PROXY_URL` | 4번에서 나온 워커 주소 |
-
-그리고 **Actions → Deploy app to GitHub Pages → Run workflow**.
-
-이제 앱이 그 서버로 번역합니다. **코드는 한 줄도 건드리지 않았습니다** — 배포할 때
-이 값을 끼워 넣도록 돼 있습니다. 값을 비우면 서버 없던 상태로 돌아갑니다.
+그 주소를 `app/js/translate.js`의 `PROXY_URL`에 넣어 커밋하면 됩니다(비밀이 아닙니다 —
+키는 서버에만 있습니다). 웹 링크, 안드로이드, iOS 빌드가 전부 그 값을 씁니다.
+저장소 변수 `PROXY_URL`을 두는 방법도 그대로 됩니다 — 코드에 값이 비어 있을 때만
+배포가 끼워 넣습니다.
 
 ## 잘 됐는지 확인
 
@@ -128,7 +114,7 @@ Cloudflare 자체는 이 규모에서 **무료**입니다. 나가는 돈은 Anth
 `worker.test.mjs`가 이 순서를 실제로 검증합니다.
 
 ```bash
-node server/worker.test.mjs     # 12개, 네트워크도 키도 돈도 들지 않음
+node server/worker.test.mjs     # 네트워크도 키도 돈도 들지 않음
 ```
 
 ## 설정 바꾸기
@@ -136,9 +122,10 @@ node server/worker.test.mjs     # 12개, 네트워크도 키도 돈도 들지 �
 `wrangler.toml`에서:
 
 - `DAILY_LIMIT` — 1인 1일 번역 횟수 (기본 20)
-- `MODEL` — 기본 `claude-opus-5`. `claude-sonnet-5`나 `claude-haiku-4-5`로
+- `MODEL` — 기본 `claude-opus-5-5`. `claude-sonnet-5-5`나 `claude-haiku-5-5`로
   내리면 싸지지만 **번역 품질이 이 앱의 전부**이므로 내리기 전에 직접 비교해보길
   권합니다
-- `ALLOWED_ORIGINS` — 앱이 서비스되는 주소. 여기 없는 곳에서 온 요청은 거부됩니다
+- `ALLOWED_ORIGINS` — 앱이 서비스되는 주소. 여기 없는 곳에서 온 요청은 거부됩니다.
+  `https://localhost`(안드로이드 앱)와 `capacitor://localhost`(iOS 앱)는 지우면 안 됩니다
 
 고치고 `main`에 올리면 자동으로 다시 배포됩니다.
