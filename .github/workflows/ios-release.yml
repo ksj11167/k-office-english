@@ -1,0 +1,189 @@
+name: Build iOS release
+
+# The App Store's counterpart to release.yml: archive, sign, and upload to
+# TestFlight, with no Mac on anyone's desk. The repository is public, so the
+# macOS runner is free, and an App Store Connect API key lets xcodebuild
+# create the distribution certificate and profile itself ("cloud signing"),
+# so there is no .p12 or provisioning profile to export and keep safe.
+#
+# Secrets (store/app-store.md has the clicks):
+#   ASC_KEY_ID       Key ID of an App Store Connect API key with Admin access
+#   ASC_ISSUER_ID    Issuer ID shown above the key list
+#   ASC_KEY_P8       the whole AuthKey_XXXX.p8 file, pasted as text
+#   APPLE_TEAM_ID    10-character Team ID from developer.apple.com → Membership
+#
+# dry_run builds an unsigned archive and stops. It proves the project
+# archives in Release before anyone has an Apple account; the result cannot be
+# installed or uploaded.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: '빌드 번호 — 비워 두면 자동 (실행 번호 + 100). 직접 넣을 일은 거의 없습니다'
+        type: string
+        default: ''
+      dry_run:
+        description: 'Apple 계정 없이 빌드 경로만 확인 (서명·업로드 안 함)'
+        type: boolean
+        default: false
+
+jobs:
+  archive:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+
+      # App Store Connect refuses a build number it has seen for the same
+      # version. The run number only goes up; the +100 keeps it clear of any
+      # build someone once uploaded by hand from Xcode.
+      - name: Pick the version
+        env:
+          TYPED: ${{ inputs.build_number }}
+          RUN: ${{ github.run_number }}
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          BN="${TYPED:-$((RUN + 100))}"
+          if ! [[ "$BN" =~ ^[1-9][0-9]{0,8}$ ]]; then
+            echo "::error::build_number 는 1 이상의 정수여야 합니다 (받은 값: '$BN')."
+            exit 1
+          fi
+          VN="1.0"
+          if [ "$REF_TYPE" = tag ]; then VN="${REF_NAME#v}"; fi
+          echo "BUILD_NUMBER=$BN" >> "$GITHUB_ENV"
+          echo "VERSION_NAME=$VN" >> "$GITHUB_ENV"
+          echo "버전 $VN, 빌드 $BN"
+
+      - name: Check the App Store Connect settings are filled in
+        if: ${{ !inputs.dry_run }}
+        env:
+          KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ISSUER: ${{ secrets.ASC_ISSUER_ID }}
+          P8: ${{ secrets.ASC_KEY_P8 }}
+          TEAM: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          missing=""
+          [ -n "$KEY_ID" ] || missing="$missing ASC_KEY_ID"
+          [ -n "$ISSUER" ] || missing="$missing ASC_ISSUER_ID"
+          [ -n "$P8" ]     || missing="$missing ASC_KEY_P8"
+          [ -n "$TEAM" ]   || missing="$missing APPLE_TEAM_ID"
+          if [ -n "$missing" ]; then
+            echo "::error::App Store Connect 시크릿이 비어 있습니다:$missing — store/app-store.md 참조. 계정 없이 빌드 경로만 보려면 dry_run 을 켜고 다시 실행하세요."
+            exit 1
+          fi
+          if ! printf '%s' "$P8" | grep -q 'BEGIN PRIVATE KEY'; then
+            echo "::error::ASC_KEY_P8 이 .p8 파일 내용이 아닙니다. 파일을 텍스트로 열어 -----BEGIN PRIVATE KEY----- 부터 끝줄까지 전부 붙여넣으세요."
+            exit 1
+          fi
+          if ! [[ "$TEAM" =~ ^[A-Z0-9]{10}$ ]]; then
+            echo "::error::APPLE_TEAM_ID 는 영문 대문자·숫자 10자입니다 (developer.apple.com → Membership details)."
+            exit 1
+          fi
+          echo "시크릿 4개 전부 채워져 있습니다."
+
+      # The key exists as a file only inside this runner, and is deleted at the
+      # end whatever happens. Nothing about it is echoed.
+      - name: Write the API key
+        if: ${{ !inputs.dry_run }}
+        env:
+          KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          printf '%s\n' "$P8" > "$RUNNER_TEMP/AuthKey_$KEY_ID.p8"
+          chmod 600 "$RUNNER_TEMP/AuthKey_$KEY_ID.p8"
+
+      - run: npm ci
+      - run: npm test
+
+      # Same injection as release.yml. perl, not sed: BSD sed on macOS takes
+      # -i differently from GNU sed, and the difference fails silently.
+      - name: Point the app at the translation server
+        env:
+          PROXY: ${{ vars.PROXY_URL }}
+        run: |
+          if [ -n "$PROXY" ]; then
+            perl -pi -e 's|export const PROXY_URL = \x27\x27;|export const PROXY_URL = \x27$ENV{PROXY}\x27;|' app/js/translate.js
+            grep -n "PROXY_URL =" app/js/translate.js
+          else
+            echo "::warning::PROXY_URL 변수가 비어 있습니다 — 번역 서버 없는 빌드가 나갑니다. App Store 심사에 내기 전에 채우세요."
+          fi
+
+      - run: npx cap sync ios
+
+      - name: Archive (unsigned, dry run)
+        if: ${{ inputs.dry_run }}
+        working-directory: ios/App
+        run: |
+          xcodebuild \
+            -scheme App -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            CURRENT_PROJECT_VERSION="$BUILD_NUMBER" MARKETING_VERSION="$VERSION_NAME" \
+            CODE_SIGNING_ALLOWED=NO \
+            archive
+          test -d "$RUNNER_TEMP/App.xcarchive/Products/Applications/App.app"
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$RUNNER_TEMP/App.xcarchive/Products/Applications/App.app/Info.plist"
+          test -f "$RUNNER_TEMP/App.xcarchive/Products/Applications/App.app/PrivacyInfo.xcprivacy" \
+            || { echo "::error::개인정보 매니페스트가 앱에 들어가지 않았습니다."; exit 1; }
+          echo "::notice::서명 없는 아카이브까지 됩니다. Apple 시크릿 4개를 넣으면 같은 경로로 TestFlight 까지 올라갑니다."
+
+      - name: Archive and sign
+        if: ${{ !inputs.dry_run }}
+        working-directory: ios/App
+        env:
+          KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ISSUER: ${{ secrets.ASC_ISSUER_ID }}
+          TEAM: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          xcodebuild \
+            -scheme App -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/AuthKey_$KEY_ID.p8" \
+            -authenticationKeyID "$KEY_ID" \
+            -authenticationKeyIssuerID "$ISSUER" \
+            DEVELOPMENT_TEAM="$TEAM" CODE_SIGN_STYLE=Automatic \
+            CURRENT_PROJECT_VERSION="$BUILD_NUMBER" MARKETING_VERSION="$VERSION_NAME" \
+            archive
+
+      # destination=upload makes the export step hand the build straight to App
+      # Store Connect, so there is no separate altool/Transporter step and no
+      # .ipa to keep. It lands in TestFlight after Apple's processing (minutes).
+      - name: Upload to TestFlight
+        if: ${{ !inputs.dry_run }}
+        working-directory: ios/App
+        env:
+          KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ISSUER: ${{ secrets.ASC_ISSUER_ID }}
+          TEAM: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>$TEAM</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>uploadSymbols</key><true/>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict></plist>
+          PLIST
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/AuthKey_$KEY_ID.p8" \
+            -authenticationKeyID "$KEY_ID" \
+            -authenticationKeyIssuerID "$ISSUER"
+          echo "::notice::버전 $VERSION_NAME ($BUILD_NUMBER) 를 App Store Connect 에 올렸습니다. 처리가 끝나면 TestFlight 에 보입니다."
+
+      - name: Shred the API key
+        if: always()
+        run: rm -f "$RUNNER_TEMP"/AuthKey_*.p8

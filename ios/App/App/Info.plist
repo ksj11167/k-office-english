@@ -66,6 +66,17 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<!-- The import screen's screenshot picker. The web view's file input offers
+	     the photo library and the camera, and iOS stops the app outright if
+	     either is touched without a reason string. -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>고른 대화 캡처를 읽어 영어 연습 카드를 만듭니다. 사진첩 전체를 읽지는 않습니다.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>대화 화면을 찍어서 영어 연습 카드를 만들 때 씁니다.</string>
+	<!-- HTTPS only, nothing beyond what the OS provides: exempt, so App Store
+	     Connect does not ask the export compliance question on every build. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>영어 문장을 소리 내어 말하면 발음을 맞춰보기 위해 마이크를 사용합니다.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
