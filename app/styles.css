@@ -171,6 +171,29 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
 .or { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 13px; }
 .or::before, .or::after { content: ""; flex: 1; border-top: 1px solid var(--line); }
 label.btn.busy { pointer-events: none; }
+
+/* AI consent: a sheet over everything, from the bottom on a phone. */
+.consent {
+  position: fixed; inset: 0; z-index: 50;
+  display: flex; align-items: flex-end; justify-content: center;
+  background: rgba(16, 20, 28, .48);
+  padding: 16px max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+}
+.consent.hide { display: none; }
+.consent-sheet {
+  width: 100%; max-width: 480px; max-height: 100%; overflow-y: auto;
+  background: var(--surface); border: var(--frame); border-radius: var(--r-lg);
+  box-shadow: var(--sheet-shadow); padding: 22px 20px 18px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.consent-sheet h2 { font-size: 20px; }
+.consent-sheet > p { color: var(--ink-2); font-size: 15px; }
+.consent-rows { margin: 0; display: grid; grid-template-columns: auto 1fr; border-top: 1px solid var(--line); }
+.consent-rows dt, .consent-rows dd { margin: 0; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.consent-rows dt { color: var(--muted); font-weight: 700; font-size: 12.5px; padding-right: 14px; }
+.consent-rows dd { color: var(--ink-2); }
+.consent-actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; margin-top: 4px; }
+@media (min-width: 720px) { .consent { align-items: center; } }
 label.btn.off { background: var(--surface-2); color: var(--muted); border-color: transparent; pointer-events: none; }
 
 .note {

@@ -238,10 +238,34 @@
       <div class="panel">
         <h2>개인정보</h2>
         <p class="small">대화는 기기 안에서 읽고, 영어로 옮기는 순간에만 전송됩니다. 서버에 저장하지 않습니다.</p>
+        <p class="small" id="consent-state"></p>
+        <button class="btn ghost wide hide" id="consent-revoke">AI 전송 동의 거두기</button>
         <a class="btn ghost wide" href="privacy.html">개인정보 처리방침</a>
       </div>
     </div>
   </section>
+
+  <!-- ══════ AI CONSENT ══════ -->
+  <!-- Asked once, before the first time anything leaves the device for the
+       model: a day to translate, a paste to sort, screenshots to read. Not a
+       <dialog>: the iOS app targets 15.0 and <dialog> arrived in 15.4. -->
+  <div class="consent hide" id="ai-consent" role="dialog" aria-modal="true" aria-labelledby="consent-title">
+    <div class="consent-sheet">
+      <h2 id="consent-title">대화를 AI로 보내도 될까요?</h2>
+      <p>영어로 옮기거나 캡처를 읽으려면, 고른 대화가 <b>Anthropic의 AI(Claude)</b>로 전송됩니다.</p>
+      <dl class="consent-rows">
+        <dt>보내는 것</dt><dd>그 날 대화의 글과 말한 사람의 이름, 또는 직접 고른 캡처 이미지</dd>
+        <dt>쓰는 곳</dt><dd>영어 번역과 캡처 읽기에만 씁니다</dd>
+        <dt>보관</dt><dd>이 앱의 서버에는 저장되지 않습니다. Anthropic에서의 처리는 Anthropic의 개인정보 방침을 따릅니다</dd>
+      </dl>
+      <p class="small">대화 상대의 말도 함께 보내집니다. 민감한 대화는 빼고 가져와 주세요. 동의는 설정에서 언제든 거둘 수 있습니다.</p>
+      <a class="linkbtn" href="privacy.html">개인정보 처리방침 보기</a>
+      <div class="consent-actions">
+        <button class="btn ghost" id="consent-no">보내지 않기</button>
+        <button class="btn" id="consent-yes">동의하고 보내기</button>
+      </div>
+    </div>
+  </div>
 
 </div>
 

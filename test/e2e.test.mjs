@@ -371,6 +371,14 @@ try {
     await page.click('#go-import');
     assert(!(await page.locator('#shots').isDisabled()), 'the screenshot picker is off with a key set');
     await page.setInputFiles('#shots', join(ROOT, 'icons', 'icon-192.png'));
+    // Nothing goes to the model before the user agrees, and saying no sends nothing.
+    await page.waitForSelector('#ai-consent:not(.hide)');
+    await page.click('#consent-no');
+    assert(calls.length === 0, 'a screenshot was sent after the user declined');
+    assert((await page.locator('#import-err').innerText()).includes('보내지 않았습니다'), 'no word on the decline');
+    await page.setInputFiles('#shots', join(ROOT, 'icons', 'icon-192.png'));
+    await page.waitForSelector('#ai-consent:not(.hide)');
+    await page.click('#consent-yes');
     await page.waitForSelector('#s-preview.on', { timeout: 10000 });
     assert(calls[0] === 'read', 'the screenshot never reached the model');
     assert((await page.locator('#stats .stat b').allTextContents())[3] === 'AI가 읽음', 'format not named');
@@ -384,6 +392,8 @@ try {
     assert(rows[0].includes('캡처한 대화'), 'the newest import is not first: ' + rows[0]);
     await page.click('#day-list .day >> nth=0');
     await page.waitForSelector('#s-transcript.on', { timeout: 10000 });
+    assert(await page.locator('#ai-consent').evaluate((el) => el.classList.contains('hide')),
+      'asked for consent a second time');
     assert((await page.locator('#tx-pick').innerText()).includes('나는 나'), 'asked who I am, though the screenshot said');
     assert(await page.locator('#go-practice').innerText() === '내 말 1장 연습하기', 'deck not built from my bubble');
     assert((await page.locator('#tx-body').innerText()).includes('EN m1'), 'the read chat was not translated');

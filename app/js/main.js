@@ -124,6 +124,45 @@ function refreshHome() {
   $('go-resume').textContent = remaining ? `이어서 하기 (${remaining}일 남음)` : `복습하기 (${state.days.length}일치)`;
 }
 
+/* ══════ AI consent ══════ */
+/* Nothing leaves the device for the model until the user has said yes once:
+   a day to translate, a paste the parser could not read, screenshots. The
+   sample never asks — its English ships with the app. App Review asks for this
+   (data shared with a third-party AI needs explicit permission), and it is the
+   honest thing to show anyone whose colleagues' messages are about to be sent. */
+const CONSENT = 'rte.aiConsent';
+const hasConsent = () => { try { return localStorage.getItem(CONSENT) === '1'; } catch { return false; } };
+
+function askConsent() {
+  if (hasConsent()) return Promise.resolve(true);
+  return new Promise((resolve) => {
+    const box = $('ai-consent');
+    const before = document.activeElement;
+    const done = (ok) => {
+      box.classList.add('hide');
+      $('consent-yes').removeEventListener('click', yes);
+      $('consent-no').removeEventListener('click', no);
+      document.removeEventListener('keydown', key);
+      if (ok) { try { localStorage.setItem(CONSENT, '1'); } catch { /* asks again next time */ } }
+      if (before && before.focus) before.focus();
+      resolve(ok);
+    };
+    const yes = () => done(true);
+    const no = () => done(false);
+    const key = (e) => { if (e.key === 'Escape') done(false); };
+    $('consent-yes').addEventListener('click', yes);
+    $('consent-no').addEventListener('click', no);
+    document.addEventListener('keydown', key);
+    box.classList.remove('hide');
+    $('consent-yes').focus();
+  });
+}
+
+$('consent-revoke').addEventListener('click', () => {
+  try { localStorage.removeItem(CONSENT); } catch { /* nothing stored */ }
+  openSettings();
+});
+
 /* ══════ import ══════ */
 const paste = $('paste');
 paste.addEventListener('input', () => { $('go-parse').disabled = paste.value.trim().length < 10; });
@@ -171,6 +210,10 @@ async function ingest(raw, isSample) {
   // format is nothing like the others. The model can still tell who said what.
   if (p.messages.length === 0 && raw.trim().length >= 10 && T.provider() !== 'none') {
     show('import');
+    if (!(await askConsent())) {
+      $('import-err').textContent = '보내지 않았습니다. «이름: 말»처럼 이름이 함께 복사되면 AI 없이 기기 안에서 읽을 수 있어요.';
+      return;
+    }
     busy(true, '대화 형식을 몰라서 AI가 읽고 있습니다…');
     try {
       p = fromModelRows(await T.readChat({ text: raw }));
@@ -194,6 +237,10 @@ async function ingest(raw, isSample) {
 async function readShots(files) {
   if (reading) return;
   show('import');
+  if (!(await askConsent())) {
+    $('import-err').textContent = '보내지 않았습니다. 캡처는 AI가 읽어야 해서, 대신 대화를 복사해 붙여넣어 주세요.';
+    return;
+  }
   busy(true, `캡처 ${files.length}장을 읽고 있습니다…`);
   let p;
   try {
@@ -355,6 +402,12 @@ const SLICE = 60;
 const OVERLAP = 6;
 
 async function build(day) {
+  const sample = day.sample ?? state.usingSample;
+  if (!sample && T.provider() !== 'none' && !(await askConsent())) {
+    renderDays();
+    show('days');
+    return;
+  }
   show('build');
   $('build-retry').classList.add('hide');
   $('build-back').classList.add('hide');
@@ -366,7 +419,7 @@ async function build(day) {
 
   const todo = day.messages.filter((m) => !m.media);
 
-  if (day.sample ?? state.usingSample) {
+  if (sample) {
     for (const m of todo) {
       const hit = SAMPLE_EN[m.ko];
       m.en = hit ? hit[0] : m.ko;
@@ -844,6 +897,11 @@ function openSettings() {
   $('data-state').textContent = (state.days.length
     ? `${state.days.length}일치 대화와 카드 ${cards}개가 이 브라우저에 저장돼 있습니다.`
     : '저장된 대화가 없습니다.') + (jobsStarted ? ` 직무별 표현 ${jobsStarted}개 덱의 진도도 있습니다.` : '');
+  const consented = hasConsent();
+  $('consent-state').textContent = consented
+    ? 'AI로 대화를 보내는 데 동의한 상태입니다.'
+    : '아직 AI 전송에 동의하지 않았습니다. 처음 영어로 옮길 때 묻습니다.';
+  $('consent-revoke').classList.toggle('hide', !consented);
   show('settings');
 }
 
