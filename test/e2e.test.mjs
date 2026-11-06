@@ -55,6 +55,14 @@ async function step(name, fn) {
 
 const assert = (cond, msg) => { if (!cond) throw new Error(msg); };
 
+const SLACK_TXT = `박팀장  오전 9:15
+배포 건 어떻게 됐어요?
+김세진  오전 9:17
+지금 QA 돌리는 중입니다
+오늘 안에 끝낼게요
+박팀장  오전 9:18
+넵 부탁해요`;
+
 const SHARED_TXT = `대화방 님과 카카오톡 대화
 --------------- 2026년 9월 15일 월요일 ---------------
 [김세진] [오전 9:01] 공유로 들어온 말입니다
@@ -259,7 +267,7 @@ try {
     // which is the part the app owns.
     await page.goto(base);
     await page.evaluate(async (txt) => {
-      const c = await caches.open('koe-v3');
+      const c = await caches.open('koe-v4');
       await c.put('./__shared-export', new Response(txt, { headers: { 'content-type': 'text/plain' } }));
     }, SHARED_TXT);
     await page.goto(base + '?shared=1');
@@ -307,6 +315,80 @@ try {
     await page.click('#job-list .day[data-job="dev"]');
     await page.waitForSelector('#s-practice.on');
     assert(await page.locator('#pr-count').innerText() === '0/10', 'the second session is not ten cards');
+  });
+
+  // Telegram, Slack, Teams and company messengers have no export, only copy.
+  await step('a chat copied out of another messenger is read with no server', async () => {
+    await page.goto(base);
+    await page.waitForSelector('#s-home.on');
+    await page.click('#go-import');
+    await page.waitForSelector('#s-import.on');
+    await page.fill('#paste', SLACK_TXT);
+    await page.click('#go-parse');
+    await page.waitForSelector('#s-preview.on');
+    const stats = await page.locator('#stats .stat b').allTextContents();
+    assert(stats[0] === '4', 'expected 4 messages, got ' + stats[0]);
+    assert(stats[3] === '메신저 복사', 'format not named: ' + stats[3]);
+    await page.click('#go-days');
+    await page.waitForSelector('#s-days.on');
+    const rows = await page.locator('#day-list .day').allInnerTexts();
+    assert(rows.length === 3, 'a paste must sit beside the sample days, got ' + rows.length + ' rows');
+    assert(rows[0].includes('붙여넣은 대화'), 'the pasted session is not labelled: ' + rows[0]);
+  });
+
+  await step('with a key, screenshots are read and my bubbles are already mine', async () => {
+    const calls = [];
+    await page.route('https://api.anthropic.com/**', async (route) => {
+      const req = route.request();
+      const cors = {
+        'access-control-allow-origin': '*',
+        'access-control-allow-headers': '*',
+        'access-control-allow-methods': 'POST, OPTIONS',
+      };
+      if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
+      const body = JSON.parse(req.postData());
+      const content = body.messages[0].content;
+      let reply;
+      if (Array.isArray(content) && content.some((b) => b.type === 'image')) {
+        calls.push('read');
+        reply = [
+          { speaker: '박팀장', text: '오늘까지 되나요?', time: '오전 9:15' },
+          { speaker: '?', text: '넵 확인해볼게요', mine: true },
+        ];
+      } else {
+        calls.push('translate');
+        const ids = [...String(content).matchAll(/"id": "(m\d+)"/g)].map((m) => m[1]);
+        reply = ids.map((id) => ({ id, en: 'EN ' + id, situation: '대화' }));
+      }
+      return route.fulfill({
+        status: 200, headers: cors, contentType: 'application/json',
+        body: JSON.stringify({ content: [{ type: 'text', text: JSON.stringify(reply) }], stop_reason: 'end_turn' }),
+      });
+    });
+    await page.evaluate(() => localStorage.setItem('rte.apikey', 'sk-ant-test'));
+    await page.goto(base);
+    await page.waitForSelector('#s-home.on');
+    await page.click('#go-import');
+    assert(!(await page.locator('#shots').isDisabled()), 'the screenshot picker is off with a key set');
+    await page.setInputFiles('#shots', join(ROOT, 'icons', 'icon-192.png'));
+    await page.waitForSelector('#s-preview.on', { timeout: 10000 });
+    assert(calls[0] === 'read', 'the screenshot never reached the model');
+    assert((await page.locator('#stats .stat b').allTextContents())[3] === 'AI가 읽음', 'format not named');
+    const mine = await page.locator('#preview-tx .bub.mine').allInnerTexts();
+    assert(mine.length === 1 && mine[0].includes('넵 확인해볼게요'), 'my right-hand bubble is not marked mine');
+
+    await page.click('#go-days');
+    await page.waitForSelector('#s-days.on');
+    const rows = await page.locator('#day-list .day').allInnerTexts();
+    assert(rows.length === 4, 'earlier days were lost, got ' + rows.length + ' rows');
+    assert(rows[0].includes('캡처한 대화'), 'the newest import is not first: ' + rows[0]);
+    await page.click('#day-list .day >> nth=0');
+    await page.waitForSelector('#s-transcript.on', { timeout: 10000 });
+    assert((await page.locator('#tx-pick').innerText()).includes('나는 나'), 'asked who I am, though the screenshot said');
+    assert(await page.locator('#go-practice').innerText() === '내 말 1장 연습하기', 'deck not built from my bubble');
+    assert((await page.locator('#tx-body').innerText()).includes('EN m1'), 'the read chat was not translated');
+    await page.evaluate(() => localStorage.removeItem('rte.apikey'));
+    await page.unroute('https://api.anthropic.com/**');
   });
 
   await step('no script errors anywhere in the walk', async () => {

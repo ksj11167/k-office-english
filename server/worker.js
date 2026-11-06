@@ -18,7 +18,13 @@
  * Deploy: see server/README.md.
  */
 
-const MAX_BODY = 200_000;          // ~a very long day of chat; refuse more
+const MAX_PROMPT = 200_000;        // ~a very long day of chat; refuse more
+// Screenshots: the app shrinks each to ~1568px on the long edge as JPEG, which
+// lands near 300 KB of base64. Ten is a long scroll of chat; more is abuse.
+const MAX_IMAGES = 10;
+const MAX_IMAGE = 1_500_000;
+const MAX_BODY = MAX_PROMPT + MAX_IMAGES * MAX_IMAGE;
+const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const MODELS = new Set(['claude-opus-5', 'claude-sonnet-5', 'claude-haiku-4-5']);
 
 export default {
@@ -39,6 +45,23 @@ export default {
     if (typeof body.prompt !== 'string' || !body.prompt.trim()) {
       return fail(400, 'invalid_request', cors);
     }
+    if (body.prompt.length > MAX_PROMPT) return fail(413, 'prompt_too_large', cors);
+
+    const images = body.images === undefined ? [] : body.images;
+    if (!Array.isArray(images) || images.length > MAX_IMAGES) return fail(400, 'invalid_request', cors);
+    for (const im of images) {
+      if (!im || !IMAGE_TYPES.has(im.media_type) || typeof im.data !== 'string'
+          || !im.data || im.data.length > MAX_IMAGE || !/^[A-Za-z0-9+/=]+$/.test(im.data)) {
+        return fail(400, 'invalid_request', cors);
+      }
+    }
+    // Images first, then the instruction: the order the model reads best.
+    const content = images.length
+      ? [
+        ...images.map((im) => ({ type: 'image', source: { type: 'base64', media_type: im.media_type, data: im.data } })),
+        { type: 'text', text: body.prompt },
+      ]
+      : body.prompt;
 
     const quota = await spend(request, env);
     if (!quota.ok) {
@@ -63,7 +86,7 @@ export default {
           // stays on — disabling it on Opus 5 has its own failure modes — but
           // at the lowest effort, which is where this workload belongs.
           output_config: { effort: 'low' },
-          messages: [{ role: 'user', content: body.prompt }],
+          messages: [{ role: 'user', content }],
         }),
       });
     } catch {

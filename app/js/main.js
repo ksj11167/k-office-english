@@ -1,4 +1,6 @@
-import { parseKakaoExport, groupByDay, cardsForSpeaker, speakersIn, guessRoomType } from './kakao-parser.js';
+import { groupByDay, cardsForSpeaker, speakersIn, guessRoomType, dateSortKey } from './kakao-parser.js';
+import { parseChat, fromModelRows, todayKorean } from './chat-parser.js';
+import { prepareShots } from './shots.js';
 import { newCardState, review, isDue, isLearned, dueLabel } from './srs.js';
 import { createSwipeDeck } from './swipe.js';
 import * as T from './translate.js';
@@ -107,8 +109,15 @@ function refreshHome() {
   $('go-import').classList.toggle('ghost', has || !canTranslate);
   $('home-sample').classList.toggle('ghost', canTranslate);
   $('go-import').textContent = canTranslate
-    ? '내 카톡 대화 가져오기'
-    : '내 카톡 대화 가져오기 (API 키 필요)';
+    ? '내 대화 가져오기'
+    : '내 대화 가져오기 (API 키 필요)';
+
+  // Screenshots are read by the model, so with no provider there is nothing
+  // to read them with. Say so on the button rather than fail after the pick.
+  const vision = T.provider() === 'apikey' || T.provider() === 'proxy';
+  $('shots-btn').classList.toggle('off', !vision);
+  $('shots').disabled = !vision;
+  $('shots-label').textContent = vision ? '대화 캡처 이미지 고르기' : '대화 캡처 이미지 고르기 (API 키 필요)';
 
   if (!has) return;
   const remaining = state.days.filter((d) => dayStatus(d) !== 'done').length;
@@ -121,6 +130,7 @@ paste.addEventListener('input', () => { $('go-parse').disabled = paste.value.tri
 
 $('file').addEventListener('change', async (e) => {
   const f = e.target.files && e.target.files[0];
+  e.target.value = '';
   if (!f) return;
   try {
     paste.value = await f.text();
@@ -130,29 +140,104 @@ $('file').addEventListener('change', async (e) => {
     $('import-err').textContent = '파일을 읽지 못했습니다. 내용을 직접 붙여넣어 주세요.';
   }
 });
+$('shots').addEventListener('change', (e) => {
+  const files = [...(e.target.files || [])];
+  e.target.value = '';                     // picking the same shots again must fire again
+  if (files.length) readShots(files);
+});
 $('go-parse').addEventListener('click', () => ingest(paste.value, false));
 $('go-sample').addEventListener('click', () => ingest(SAMPLE_TXT, true));
 $('back-home').addEventListener('click', () => { refreshHome(); show('home'); });
 $('back-preview').addEventListener('click', () => show('import'));
 $('back-days').addEventListener('click', () => { if (parsed) show('preview'); else { refreshHome(); show('home'); } });
 
-function ingest(raw, isSample) {
-  const p = parseKakaoExport(raw);
+const KAKAO = new Set(['android', 'ios', 'mixed']);
+
+/* While the model reads, the import screen is the progress screen: the user
+   is still looking at what they handed over, and can see it is being read. */
+let reading = false;
+function busy(on, msg = '') {
+  reading = on;
+  $('go-parse').disabled = on || paste.value.trim().length < 10;
+  $('shots-btn').classList.toggle('busy', on);
+  $('import-err').textContent = msg;
+}
+
+async function ingest(raw, isSample) {
+  if (reading) return;
+  let p = parseChat(raw);
+
+  // No names in it: bubbles dragged off a phone, or a messenger whose copy
+  // format is nothing like the others. The model can still tell who said what.
+  if (p.messages.length === 0 && raw.trim().length >= 10 && T.provider() !== 'none') {
+    show('import');
+    busy(true, '대화 형식을 몰라서 AI가 읽고 있습니다…');
+    try {
+      p = fromModelRows(await T.readChat({ text: raw }));
+    } catch (e) {
+      busy(false, T.messageFor(e && e.code));
+      return;
+    }
+    busy(false);
+  }
+
   if (p.messages.length === 0) {
-    $('import-err').textContent =
-      '카톡 대화 형식을 찾지 못했습니다. 카톡에서 «대화 내용 내보내기 → 텍스트만»으로 저장한 파일인지 확인해 주세요.';
+    $('import-err').textContent = T.provider() === 'none'
+      ? '대화 형식을 찾지 못했습니다. «이름: 말»처럼 이름이 함께 복사됐는지 확인하거나, 카톡은 «대화 내용 내보내기 → 텍스트만» 파일을 골라 주세요.'
+      : '읽어낸 대화가 없습니다. 이름과 말이 함께 복사됐는지 확인하거나, 대화 화면을 캡처해서 올려 주세요.';
     show('import');
     return;
   }
+  accept(p, isSample ? 'sample' : KAKAO.has(p.format) ? 'kakao' : 'paste');
+}
+
+async function readShots(files) {
+  if (reading) return;
+  show('import');
+  busy(true, `캡처 ${files.length}장을 읽고 있습니다…`);
+  let p;
+  try {
+    const images = await prepareShots(files);
+    p = fromModelRows(await T.readChat({ images }));
+  } catch (e) {
+    const code = e && e.code;
+    busy(false, code === 'too_many_shots'
+      ? '캡처가 너무 많습니다. 한 번에 10장 분량까지 읽을 수 있어요. 나눠서 가져와 주세요.'
+      : code === 'bad_image'
+        ? '이미지를 열지 못했습니다. 다른 캡처로 다시 골라 주세요.'
+        : T.messageFor(code));
+    return;
+  }
+  busy(false);
+  if (p.messages.length === 0) {
+    $('import-err').textContent = '캡처에서 대화를 찾지 못했습니다. 말풍선이 보이는 화면인지 확인해 주세요.';
+    return;
+  }
+  accept(p, 'shot');
+}
+
+/* Everything after this point is the same whichever way the chat came in. */
+function accept(p, src) {
   $('import-err').textContent = '';
+  // A paste or a screenshot rarely says what day it is. It is today's chat
+  // until it says otherwise: that is when people grab it.
+  if (src === 'paste' || src === 'shot') {
+    const today = todayKorean();
+    for (const m of p.messages) if (!m.date) m.date = today;
+  }
+  p.src = src;
+  // My bubbles in a screenshot are the ones on the right; the model named them.
+  p.me = src === 'shot' && p.messages.some((m) => m.speaker === '나') ? '나' : null;
   parsed = p;
-  state.usingSample = isSample;
-  state.roomTitle = p.roomTitle;
   renderPreview();
   show('preview');
 }
 
 /* ══════ preview ══════ */
+const FORMAT_NAME = {
+  android: '카톡', ios: '카톡', mixed: '카톡',
+  inline: '이름: 말', blocks: '메신저 복사', model: 'AI가 읽음',
+};
 /* The gate survives on one of its two legs. Translating everything (D18) killed
    the "don't pay to translate what you'll throw away" argument, but parsing a
    format Kakao never promised to keep still breaks, and translating garbage
@@ -165,11 +250,12 @@ function renderPreview() {
     ['메시지', parsed.messages.length],
     ['참여자', parsed.speakers.length],
     ['날짜', days || '—'],
-    ['형식', parsed.format === 'android' ? 'Android' : parsed.format === 'ios' ? 'iOS' : parsed.format],
+    ['형식', FORMAT_NAME[parsed.format] || parsed.format],
   ].map(([k, v]) => `<div class="stat"><b>${esc(v)}</b><span>${k}</span></div>`).join('');
 
   $('preview-tx').innerHTML = parsed.messages.slice(0, 40).map((m) => {
-    const mine = state.me && m.speaker === state.me;
+    const me = parsed.me || state.me;
+    const mine = me && m.speaker === me;
     return `<div class="bub ${mine ? 'mine' : ''} ${m.media ? 'media' : ''}">` +
       `<span class="who">${esc(m.speaker)}</span>` +
       esc(m.media ? `(${m.text})` : m.text) + '</div>';
@@ -181,19 +267,45 @@ function renderPreview() {
     : `${parsed.messages.length}개 메시지 — ${groups.length}일치로 나뉩니다. 하루씩 영어로 옮깁니다.`;
 }
 
+/* Where a day came from decides how a new import treats it. A KakaoTalk
+   export is the whole room's history, so importing it again replaces the
+   room's days (keeping any already translated). A paste or a screenshot is a
+   piece of one conversation, so it is added beside whatever is there — the
+   Telegram chat from this morning must not wipe yesterday's Kakao days. */
+const isWhole = (d) => !d.src || d.src === 'kakao' || d.src === 'sample';
+
 $('go-days').addEventListener('click', () => {
   const roomType = guessRoomType(parsed);
   const groups = groupByDay(parsed);
-  const existing = new Map(state.days.map((d) => [d.date, d]));
-  state.days = groups.map((g) => {
-    const old = existing.get(g.date);
-    if (old && old.built) return old;                 // keep translations already paid for
-    return { date: g.date, roomType, built: false, messages: g.messages, cards: [] };
-  });
+  const src = parsed.src || 'kakao';
+  const sample = src === 'sample';
+  let fresh;
+  let kept;
+  if (isWhole({ src })) {
+    const existing = new Map(state.days.filter(isWhole).map((d) => [d.date, d]));
+    fresh = groups.map((g) => {
+      const old = existing.get(g.date);
+      if (old && old.built && !!old.sample === sample) return old;   // keep translations already paid for
+      return { date: g.date, src, sample, title: parsed.roomTitle, roomType, built: false, messages: g.messages, cards: [] };
+    });
+    kept = state.days.filter((d) => !isWhole(d));
+  } else {
+    const stamp = Date.now();
+    fresh = groups.map((g, k) => ({
+      key: `${src}:${stamp}:${k}`, date: g.date, src, sample: false, title: null,
+      me: parsed.me, roomType, built: false, messages: g.messages, cards: [],
+    }));
+    kept = state.days;
+  }
+  // Newest date first; on the same date the newest import first. sort() is
+  // stable, and fresh days go in ahead of the kept ones.
+  state.days = [...fresh, ...kept].sort((a, b) => dateSortKey(b.date) - dateSortKey(a.date));
   save();
   renderDays();
   show('days');
 });
+
+const SRC_NAME = { paste: '붙여넣은 대화', shot: '캡처한 대화' };
 
 /* ══════ day list ══════ */
 const dayStatus = (d) =>
@@ -208,7 +320,8 @@ function renderDays() {
 
   $('day-list').innerHTML = state.days.map((d, i) => {
     const st = dayStatus(d);
-    const label = st === 'done' ? '완료' : st === 'ready' ? '이어서' : '아직 안 옮김';
+    const status = st === 'done' ? '완료' : st === 'ready' ? '이어서' : '아직 안 옮김';
+    const label = SRC_NAME[d.src] ? `${SRC_NAME[d.src]}, ${status}` : status;
     const n = d.built ? `${d.cards.length}장` : `${d.messages.length}줄`;
     // The day of the month leads, large: a list of dates is scanned by date,
     // the way a calendar is, and the year is the same on every row.
@@ -253,7 +366,7 @@ async function build(day) {
 
   const todo = day.messages.filter((m) => !m.media);
 
-  if (state.usingSample) {
+  if (day.sample ?? state.usingSample) {
     for (const m of todo) {
       const hit = SAMPLE_EN[m.ko];
       m.en = hit ? hit[0] : m.ko;
@@ -387,19 +500,32 @@ function startJob(id) {
 /* This is the app's first feature standing on its own: yesterday's group chat,
    readable end to end in English. It is also where I say which one is me, which
    only became possible once the English existed (D19). */
+/* Who I am is per conversation now: "김세진" in the Kakao room, "Sejin Kim" in
+   Slack, "나" in a screenshot. The last pick is still the default, so a run of
+   days from one room asks once. */
+function meFor(day) {
+  if (day.me === '') return null;
+  const names = new Set(speakersIn(day.messages).map((p) => p.name));
+  if (day.me && names.has(day.me)) return day.me;
+  if (state.me && names.has(state.me)) return state.me;
+  return null;
+}
+
 function renderTranscript() {
   const day = state.days[activeDay];
   $('tx-title').textContent = day.date;
-  $('tx-sub').textContent = state.roomTitle ? `${state.roomTitle} 대화 ${day.messages.length}줄` : `대화 ${day.messages.length}줄`;
+  const room = day.title ?? (isWhole(day) ? state.roomTitle : null);
+  const n = day.messages.length;
+  $('tx-sub').textContent = room ? `${room} 대화 ${n}줄` : `${SRC_NAME[day.src] || '대화'} ${n}줄`;
 
   // Which name is mine is the one thing the app cannot work out for itself, so
   // it asks — but only until it has an answer. After that the question collapses
   // to a line, because the screen belongs to the conversation, not to the form.
   const people = speakersIn(day.messages);
-  const picked = state.me && people.some((p) => p.name === state.me);
-  $('tx-pick').classList.toggle('slim', !!picked);
-  $('tx-pick').innerHTML = picked
-    ? `<div class="whoami"><span>나는 <b>${esc(state.me)}</b></span>
+  const me = meFor(day);
+  $('tx-pick').classList.toggle('slim', !!me);
+  $('tx-pick').innerHTML = me
+    ? `<div class="whoami"><span>나는 <b>${esc(me)}</b></span>
          <button class="linkbtn" id="tx-change">바꾸기</button></div>`
     : `<h2>어느 쪽이 나인가요?</h2>
        <p class="small">고른 사람의 말이 카드가 됩니다. 나머지는 맥락으로 쓰여요.</p>
@@ -410,13 +536,14 @@ function renderTranscript() {
          </label>`).join('')}</div>`;
 
   const change = $('tx-change');
-  if (change) change.addEventListener('click', () => { state.me = null; save(); renderTranscript(); });
+  // '' means "asked to choose again", so the shared default does not answer for it.
+  if (change) change.addEventListener('click', () => { day.me = ''; save(); renderTranscript(); });
   for (const r of $('tx-pick').querySelectorAll('input')) {
-    r.addEventListener('change', () => { state.me = r.value; save(); renderTranscript(); });
+    r.addEventListener('change', () => { day.me = r.value; state.me = r.value; save(); renderTranscript(); });
   }
 
   $('tx-body').innerHTML = day.messages.map((m) => {
-    const mine = m.speaker === state.me;
+    const mine = m.speaker === me;
     if (m.media) {
       return `<div class="bub media"><span class="who">${esc(m.speaker)}</span>(${esc(m.ko)})</div>`;
     }
@@ -440,16 +567,16 @@ function renderTranscript() {
     }
   }
 
-  const n = state.me ? cardsForSpeaker(day.messages, state.me).length : 0;
-  $('go-practice').disabled = n === 0;
-  $('go-practice').textContent = n ? `내 말 ${n}장 연습하기` : '나를 먼저 골라주세요';
+  const cards = me ? cardsForSpeaker(day.messages, me).length : 0;
+  $('go-practice').disabled = cards === 0;
+  $('go-practice').textContent = cards ? `내 말 ${cards}장 연습하기` : '나를 먼저 골라주세요';
   show('transcript');
 }
 
 $('back-transcript').addEventListener('click', () => { renderDays(); show('days'); });
 $('go-practice').addEventListener('click', () => {
   const day = state.days[activeDay];
-  const fresh = cardsForSpeaker(day.messages, state.me);
+  const fresh = cardsForSpeaker(day.messages, meFor(day));
   // Rebuilding must not reset what FSRS already knows about a card.
   const old = new Map((day.cards || []).map((c) => [c.id, c.srs]));
   day.cards = fresh.map((c) => ({ ...c, srs: old.get(c.id) || newCardState() }));
@@ -749,6 +876,6 @@ onSharedChatExport((text) => {
   paste.value = text;
   $('go-parse').disabled = text.trim().length < 10;
   ingest(text, false);
-});
+}, (images) => readShots(images));
 
 if (isNative()) document.documentElement.dataset.platform = platform();

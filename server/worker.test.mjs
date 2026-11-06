@@ -137,9 +137,51 @@ await test('a refusal is reported as a refusal', async () => {
 
 await test('an oversized body is refused without being parsed', async () => {
   const { result, calls } = await withUpstream(() => ok('[]'),
-    () => worker.fetch(post('x'.repeat(200_001)), env()));
+    () => worker.fetch(post('x'.repeat(15_300_000)), env()));
   assert.equal(result.status, 413);
   assert.equal(calls.length, 0);
+});
+
+await test('an over-long prompt is refused even when the body fits', async () => {
+  const { result, calls } = await withUpstream(() => ok('[]'),
+    () => worker.fetch(post({ prompt: 'x'.repeat(200_001) }), env()));
+  assert.equal(result.status, 413);
+  assert.equal(calls.length, 0);
+});
+
+const IMG = { media_type: 'image/jpeg', data: Buffer.from('jpeg bytes').toString('base64') };
+
+await test('screenshots go upstream as image blocks ahead of the instruction', async () => {
+  const { result, calls } = await withUpstream(() => ok('[{"text":"넵","mine":true}]'),
+    () => worker.fetch(post({ prompt: '읽어줘', images: [IMG, IMG] }), env()));
+  assert.equal(result.status, 200);
+  const content = JSON.parse(calls[0].init.body).messages[0].content;
+  assert.equal(content.length, 3);
+  assert.deepEqual(content[0], { type: 'image', source: { type: 'base64', ...IMG } });
+  assert.deepEqual(content[2], { type: 'text', text: '읽어줘' });
+});
+
+await test('bad images are refused before any model call', async () => {
+  const bad = [
+    { images: 'nope' },
+    { images: Array(11).fill(IMG) },
+    { images: [{ media_type: 'image/svg+xml', data: IMG.data }] },
+    { images: [{ media_type: 'image/png', data: 'not base64!' }] },
+    { images: [{ media_type: 'image/png', data: 'A'.repeat(1_500_001) }] },
+  ];
+  for (const b of bad) {
+    const { result, calls } = await withUpstream(() => ok('[]'),
+      () => worker.fetch(post({ prompt: 'x', ...b }), env()));
+    assert.equal(result.status, 400, JSON.stringify(b).slice(0, 60));
+    assert.equal(calls.length, 0);
+  }
+});
+
+await test('a bad image request does not spend quota', async () => {
+  const e = env();
+  await withUpstream(() => ok('[]'),
+    () => worker.fetch(post({ prompt: 'x', images: [{ media_type: 'image/gif', data: 'AA' }] }), e));
+  assert.equal(e.QUOTA.m.size, 0);
 });
 
 await test('only known models are accepted; anything else falls back', async () => {

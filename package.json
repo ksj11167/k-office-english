@@ -5,7 +5,7 @@
   "description": "카톡 대화를 하루치씩 통째로 영어로 옮기고, 그 중 내가 한 말을 카드로 연습하는 앱",
   "type": "module",
   "scripts": {
-    "test": "node app/js/kakao-parser.test.mjs && node app/js/job-decks.test.mjs && node server/worker.test.mjs",
+    "test": "node app/js/kakao-parser.test.mjs && node app/js/chat-parser.test.mjs && node app/js/shots.test.mjs && node app/js/job-decks.test.mjs && node server/worker.test.mjs",
     "test:e2e": "node test/e2e.test.mjs",
     "test:all": "npm test && npm run test:e2e && npm run test:proxy",
     "artifact": "node tools/make-artifact.mjs",

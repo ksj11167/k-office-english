@@ -17,7 +17,7 @@
  *
  * Google Fonts files are content-addressed, so those stay cache-first.
  */
-const VERSION = 'koe-v3';
+const VERSION = 'koe-v4';
 const SHARE_KEY = './__shared-export';
 const SHELL = [
   './',
@@ -27,6 +27,8 @@ const SHELL = [
   './manifest.webmanifest',
   './js/main.js',
   './js/kakao-parser.js',
+  './js/chat-parser.js',
+  './js/shots.js',
   './js/srs.js',
   './js/swipe.js',
   './js/translate.js',

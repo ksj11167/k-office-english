@@ -99,13 +99,16 @@ export function createSpeaker() {
 
 /**
  * Call `handler(text)` whenever KakaoTalk (or anything else) shares a chat
- * export into the app. Web returns a no-op: there, import goes through the file
- * input on the first screen.
+ * export or copied text into the app, and `onImages(blobs)` when the share is
+ * screenshots — the one thing every messenger can share, Telegram and company
+ * messengers included. Web returns a no-op: there, import goes through the
+ * inputs on the import screen.
  *
  * @param {(text: string, name: string) => void} handler
+ * @param {(images: Blob[]) => void} [onImages]
  * @returns {Promise<() => void>} unsubscribe
  */
-export async function onSharedChatExport(handler) {
+export async function onSharedChatExport(handler, onImages) {
   const share = plugin('CapacitorShareTarget');
   const fs = plugin('Filesystem');
 
@@ -126,7 +129,20 @@ export async function onSharedChatExport(handler) {
   }
 
   const sub = await share.addListener('shareReceived', async (event) => {
-    // A share arrives either as plain text or as the exported .txt file.
+    // Screenshots first: a share of images may carry a caption as text too.
+    const shots = (event?.files || []).filter((f) => /^image\//.test(f.mimeType || ''));
+    if (shots.length && onImages && fs) {
+      const blobs = [];
+      for (const f of shots.slice(0, 10)) {
+        try {
+          const read = await fs.readFile({ path: f.uri });   // no encoding: base64
+          if (read?.data) blobs.push(base64Blob(String(read.data), f.mimeType));
+        } catch { /* skip the one we cannot read */ }
+      }
+      if (blobs.length) return onImages(blobs);
+    }
+
+    // Otherwise it arrives either as plain text or as the exported .txt file.
     const text = (event?.texts || []).find((t) => t && t.trim().length > 20);
     if (text) return handler(text, 'shared.txt');
 
@@ -142,6 +158,13 @@ export async function onSharedChatExport(handler) {
   });
 
   return () => { try { sub.remove(); } catch { /* listener already gone */ } };
+}
+
+function base64Blob(data, type) {
+  const bin = atob(data.replace(/^data:[^,]*,/, ''));
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new Blob([bytes], { type });
 }
 
 /* ─────────── speech recognition ─────────── */

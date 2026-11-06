@@ -27,7 +27,7 @@
         <button class="iconbtn" id="go-settings" aria-label="설정"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
       </div>
       <h1>어제 단톡방에서 한 말,<br>영어로 결재받기</h1>
-      <p>카톡 대화를 영어로 옮기고, 내가 한 말만 골라 말하기 카드로 만듭니다.</p>
+      <p>카톡, 텔레그램, 사내 메신저 대화를 영어로 옮기고, 내가 한 말만 골라 말하기 카드로 만듭니다.</p>
       <!-- The product in one glance, as the form people fill in at work: who
            sent it, what they said in English, what I answered in Korean, and
            the English row left for me to fill by speaking. -->
@@ -45,11 +45,11 @@
     </div>
 
     <div class="stack" style="margin-top:auto; padding-top:24px">
-      <button class="btn wide" id="go-import">내 카톡 대화 가져오기</button>
+      <button class="btn wide" id="go-import">내 대화 가져오기</button>
       <button class="btn wide" id="go-resume">이어서 하기</button>
       <button class="btn ghost wide" id="home-sample">샘플로 먼저 보기</button>
       <button class="btn ghost wide" id="go-jobs">직무별 표현으로 연습하기</button>
-      <div class="note warn hide" id="home-note"><b>번역 서버가 연결돼 있지 않습니다.</b> 샘플과 직무별 표현은 그대로 쓸 수 있고, 내 카톡은 설정에서 API 키를 넣으면 됩니다.</div>
+      <div class="note warn hide" id="home-note"><b>번역 서버가 연결돼 있지 않습니다.</b> 샘플과 직무별 표현은 그대로 쓸 수 있고, 내 대화는 설정에서 API 키를 넣으면 됩니다.</div>
       <p class="fine">대화는 이 기기 안에서 읽고, 영어로 옮길 때만 그 날 대화를 보냅니다.</p>
     </div>
   </section>
@@ -58,25 +58,37 @@
   <section class="screen" id="s-import">
     <div class="topbar">
       <button class="iconbtn" id="back-home" aria-label="뒤로"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-      <h2>카톡 대화 가져오기</h2>
+      <h2>대화 가져오기</h2>
     </div>
 
+    <!-- Every messenger can copy and every phone can screenshot; only KakaoTalk
+         can export. So the paste box leads, screenshots follow, and the Kakao
+         export is one option among three rather than the front door (D28). -->
     <div class="stack">
       <div class="panel">
-        <dl class="howto">
-          <dt>1</dt><dd>카톡 대화방 → 메뉴(≡) → <b>대화 내용 내보내기</b> → 텍스트만</dd>
-          <dt>2</dt><dd>나온 <b>.txt</b>를 고르거나 내용을 붙여넣기</dd>
-          <dt>3</dt><dd>앱이 날짜별로 나눠 보관합니다. 매일 내보낼 필요 없어요</dd>
-        </dl>
+        <p class="small">카톡, 텔레그램, 슬랙, 팀즈, 사내 메신저. 어디서 나눈 대화든 됩니다.</p>
+        <textarea id="paste" aria-label="복사한 대화" placeholder="채팅창에서 대화를 드래그해 복사한 뒤, 여기에 붙여넣으세요"></textarea>
+        <button class="btn wide" id="go-parse" disabled>읽어들이기</button>
+        <div class="or" aria-hidden="true"><span>또는</span></div>
+        <label class="btn ghost" id="shots-btn" tabindex="0">
+          <span id="shots-label">대화 캡처 이미지 고르기</span>
+          <input type="file" id="shots" accept="image/*" multiple>
+        </label>
         <label class="btn ghost" tabindex="0">
-          .txt 파일 고르기
+          카톡 .txt 파일 고르기
           <input type="file" id="file" accept=".txt,text/plain">
         </label>
-        <textarea id="paste" placeholder="또는 여기에 대화 내용을 붙여넣으세요"></textarea>
-        <button class="btn wide" id="go-parse" disabled>읽어들이기</button>
         <p class="small" id="import-err" role="status"></p>
-        <button class="btn ghost wide" id="go-sample">샘플로 먼저 보기</button>
       </div>
+      <div class="panel">
+        <dl class="howto">
+          <dt>PC</dt><dd>메신저 창에서 대화를 드래그해 복사하고, 위 칸에 붙여넣기</dd>
+          <dt>폰</dt><dd>대화 화면을 캡처해서 고르기. 여러 장도, 스크롤 캡처도 됩니다</dd>
+          <dt>카톡</dt><dd>대화방 메뉴(≡) → <b>대화 내용 내보내기</b> → 텍스트만. 가장 정확합니다</dd>
+        </dl>
+        <p class="small">가져온 대화는 날짜별로 따로 보관됩니다. 다른 메신저 대화를 가져와도 앞의 것은 그대로 남아요.</p>
+      </div>
+      <button class="btn ghost wide" id="go-sample">샘플로 먼저 보기</button>
     </div>
   </section>
 
@@ -131,7 +143,7 @@
       <h2>직무별 표현</h2>
     </div>
     <div class="stack" style="gap:16px; min-height:0">
-      <p class="small" id="jobs-sub">회사에서 매일 쓰는 말 200장. 내 카톡 없이도 바로 연습할 수 있습니다.</p>
+      <p class="small" id="jobs-sub">회사에서 매일 쓰는 말 200장. 내 대화 없이도 바로 연습할 수 있습니다.</p>
       <div class="days" id="job-list"></div>
     </div>
   </section>

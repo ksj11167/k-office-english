@@ -251,7 +251,7 @@ export function speakersIn(messages) {
 }
 
 /** Sortable number from "2024년 3월 11일"; unknown dates sink to the bottom. */
-function dateSortKey(date) {
+export function dateSortKey(date) {
   const m = String(date).match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
   if (!m) return -1;
   return +m[1] * 10000 + +m[2] * 100 + +m[3];
